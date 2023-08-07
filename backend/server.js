@@ -1,6 +1,7 @@
 const express = require("express"); /* useful for buiding APIs - routing, HTTP request handling, etc. */
 const cors = require("cors"); /* Cross-Origin Resource Sharing - facilitates comms between client-side JS code and other servers */
 const bodyParser = require("body-parser"); /*  */
+require("dotenv").config();
 
 const {
   Configuration,
@@ -10,6 +11,7 @@ const {
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
 });
+
 const openai = new OpenAIApi(configuration);
 
 const app = express();
