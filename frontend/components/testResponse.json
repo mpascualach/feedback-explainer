@@ -1,0 +1,21 @@
+{
+  "id": "chatcmpl-7lGRl5DQIVQV1EhqILdbZuMDFEaAm",
+  "object": "chat.completion",
+  "created": 1691498993,
+  "model": "gpt-3.5-turbo-0613",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Blockchain is like a digital ledger that keeps a record of all transactions or information in a transparent and secure way. Think of it as a chain of blocks, where each block contains data and is connected to the previous block. This chain is distributed across multiple computers or nodes, making it difficult for anyone to alter or tamper with the information stored in it.\n\nNow, here's your question to test your knowledge: What is the role of miners in a blockchain network?"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 32,
+    "completion_tokens": 93,
+    "total_tokens": 125
+  }
+}
