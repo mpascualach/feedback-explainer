@@ -1,10 +1,7 @@
-import Image from "next/image";
 import { Inter } from "next/font/google";
 import React, { useEffect, useState, useRef } from "react";
 import Header from "@/components/Header";
 import Button from "@/components/Button";
-
-const inter = Inter({ subsets: ["latin"] });
 
 interface Message {
   role: string;
@@ -21,6 +18,7 @@ export default function Home() {
   const prompt = `Explain ${topic} in the simplest terms possible - as if for a beginner - and then send me a question to test my knowledge `;
 
   useEffect(() => {
+    console.log("Resetting messages");
     setMessages([]);
   }, []);
 
@@ -41,16 +39,30 @@ export default function Home() {
 
   const handleClick = async () => {
     setLoading(true);
-    setTimeout(() => {}, 2000);
+    const firstPrompt = {
+      role: "user",
+      content: prompt,
+    };
+    // setTimeout(() => {}, 2000);
     try {
-      const response = await fetch("/testResponse.json");
-      const data = await response.json();
-      const message = data.choices[0].message;
-      message.content = message.content.replace(/\n/g, "<br />");
+      // const response = await fetch("/testResponse.json");
+      const response = await fetch("/api/feynman", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+        body: JSON.stringify({ messages: [firstPrompt] }),
+      });
 
-      const messagesArray = messages;
-      messagesArray.push(message);
-      setMessages(messagesArray);
+      const data = await response.json();
+      const assistantMessage = data.choices[0].message;
+      assistantMessage.content = assistantMessage.content.replace(
+        /\n/g,
+        "<br />"
+      );
+
+      setMessages((prevMessages) => [...prevMessages, assistantMessage]);
 
       setLoading(false);
     } catch (error) {
@@ -85,39 +97,50 @@ export default function Home() {
 
       setMessages((prevMessages) => [...prevMessages, userMessage]);
       setUserPrompt("");
+      callApi();
     } else {
       console.log("Please enter something before submitting");
     }
   };
 
-  // to add: dashboard
+  const callApi = async () => {
+    setLoading(true);
+    const response = await fetch("/testResponse2.json");
+    console.log("Response: ", response);
+    const data = await response.json();
+    const assistantMessage = data.choices[0].message;
+    assistantMessage.content = assistantMessage.content.replace(
+      /\n/g,
+      "<br />"
+    );
+
+    setMessages((prevMessages) => [...prevMessages, assistantMessage]);
+
+    setLoading(false);
+  };
 
   return (
     <div>
       <Header></Header>
       <main
-        className={`flex flex-col items-center justify-between p-12 ${inter.className}`}
+        className={`flex flex-col items-center justify-between p-12`}
         style={{ height: "90vh" }}
       >
         {!messages.length && !loading && (
           <Button topic="blockchain" onClick={handleClick}></Button>
         )}
-        {loading ? (
-          <p>Loading...</p>
-        ) : (
-          // Window
-          <div className="relative flex flex-col justify-between overflow-scroll">
-            {messages.map((message, index) => (
-              <div
-                dangerouslySetInnerHTML={{ __html: message.content }}
-                className={`p-4 text-white text-xl w-full h-auto ${
-                  index > 0 ? "border-t border-gray-300" : ""
-                }`}
-                key={index}
-              />
-            ))}
-          </div>
-        )}
+        <div className="relative flex flex-col justify-between overflow-scroll">
+          {messages.map((message, index) => (
+            <div
+              dangerouslySetInnerHTML={{ __html: message.content }}
+              className={`p-4 text-white text-xl w-full h-auto ${
+                index > 0 ? "border-t border-gray-300" : ""
+              }`}
+              key={index}
+            />
+          ))}
+        </div>
+        {loading ? <p>Loading...</p> : <></>}
         {!messages.length ? (
           <></>
         ) : (

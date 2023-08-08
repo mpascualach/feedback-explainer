@@ -1,17 +1,20 @@
 // Import necessary types from Next.js
 import type { NextApiRequest, NextApiResponse } from "next";
 
-// Check if required environment variable is set
-if (!process.env.OPEN_AI_API_KEY) {
-  throw new Error("Missing env var from OpenAI");
-}
+// // Check if required environment variable is set
+// if (!process.env.OPEN_AI_API_KEY) {
+//   console.log("Nope no API key");
+//   throw new Error("Missing env var from OpenAI");
+// } else {
+//   console.log("OpenAI API Key is set");
+// }
 
-// Define ChatGPTAgent type as a union of user and system
-export type ChatGPTAgent = "user" | "system";
+// // Define ChatGPTAgent type as a union of user and system
+// type ChatGPTAgent = "user" | "system";
 
 // Define ChatGPTMessage interface
 interface ChatGPTMessage {
-  role: ChatGPTAgent;
+  role: "user" | "assistant";
   content: string;
 }
 
@@ -24,24 +27,18 @@ interface promptPayload {
 }
 
 // Define async handler function
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   try {
-    const prompt = req.body.prompt;
-
-    // Validate the prompt
-    if (!prompt) {
-      return new Response("No prompt in the request", { status: 400 });
-    }
-
-    // Define payload object to send to OpenAI API
     const payload: promptPayload = {
       model: "gpt-3.5-turbo",
-      messages: [{ role: "user", content: prompt }], // build out these messages
+      messages: req.body.messages, // build out these messages
       temperature: 1,
       max_tokens: 500,
     };
 
-    // Send request to OpenAI API and wait for response
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       headers: {
         "Content-Type": "application/json",
@@ -55,10 +52,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const data = await response.json();
     return res.json(data);
   } catch (error) {
-    // Log any errors that occur during the request
     console.log("The Error: ", error);
   }
-};
-
-// Export the handler function as the default export
-export default handler;
+}
