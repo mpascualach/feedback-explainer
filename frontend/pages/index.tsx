@@ -24,6 +24,21 @@ export default function Home() {
     setMessages([]);
   }, []);
 
+  useEffect(() => {
+    const handleEnterKey = (event: KeyboardEvent) => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        handleSubmit(event);
+      }
+    };
+
+    document.addEventListener("keydown", handleEnterKey);
+
+    return () => {
+      document.removeEventListener("keydown", handleEnterKey);
+    };
+  });
+
   const handleClick = async () => {
     setLoading(true);
     setTimeout(() => {}, 2000);
@@ -57,17 +72,22 @@ export default function Home() {
     textarea.style.height = `${textarea.scrollHeight}px`; // Set the height to the actual scrollHeight
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (
+    event: React.FormEvent<HTMLFormElement> | KeyboardEvent
+  ) => {
     event.preventDefault();
 
-    const userMessage = {
-      role: "user",
-      content: userPrompt,
-    };
+    if (userPrompt.trim() !== "") {
+      const userMessage = {
+        role: "user",
+        content: userPrompt,
+      };
 
-    const messagesArray = messages;
-    messagesArray.push(userMessage);
-    setMessages(messagesArray);
+      setMessages((prevMessages) => [...prevMessages, userMessage]);
+      setUserPrompt("");
+    } else {
+      console.log("Please enter something before submitting");
+    }
   };
 
   // to add: dashboard
@@ -85,38 +105,39 @@ export default function Home() {
         {loading ? (
           <p>Loading...</p>
         ) : (
-          <div className="relative flex flex-col justify-between h-full">
+          // Window
+          <div className="relative flex flex-col justify-between overflow-scroll">
             {messages.map((message, index) => (
               <div
                 dangerouslySetInnerHTML={{ __html: message.content }}
-                className="p-4 text-white text-xl w-full"
+                className={`p-4 text-white text-xl w-full h-auto ${
+                  index > 0 ? "border-t border-gray-300" : ""
+                }`}
                 key={index}
               />
             ))}
-            {!messages.length ? (
-              <></>
-            ) : (
-              <>
-                <form className="w-full relative" onSubmit={handleSubmit}>
-                  <textarea
-                    rows={1}
-                    id="user_prompt"
-                    className="text-xl bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    value={userPrompt}
-                    onChange={handleInputChange}
-                    onInput={handleTextareaResize}
-                    style={{ maxWidth: "calc(100% - 120px)" }}
-                  />
-                  <button
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 px-4 py-2 bg-blue-500 hover:bg-blue-700 text-white rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                    type="submit"
-                  >
-                    Submit
-                  </button>
-                </form>
-              </>
-            )}
           </div>
+        )}
+        {!messages.length ? (
+          <></>
+        ) : (
+          <form className="w-full relative" onSubmit={handleSubmit}>
+            <textarea
+              rows={1}
+              id="user_prompt"
+              className="text-xl bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              value={userPrompt}
+              onChange={handleInputChange}
+              onInput={handleTextareaResize}
+              style={{ maxWidth: "calc(100% - 120px)" }}
+            />
+            <button
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 px-4 py-2 bg-blue-500 hover:bg-blue-700 text-white rounded-lg focus:ring-blue-500 focus:border-blue-500"
+              type="submit"
+            >
+              Submit
+            </button>
+          </form>
         )}
       </main>
     </div>
