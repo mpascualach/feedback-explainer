@@ -172,12 +172,14 @@ export default function Home() {
         {!messages.length && !loading && (
           <>
             <h1>Hello learner! What would you like to learn today?</h1>
-            {topics.map((topic) => (
-              <CourseButton
-                topic={topic}
-                onClick={() => handleClick(topic)}
-              ></CourseButton>
-            ))}
+            <div>
+              {topics.map((topic) => (
+                <CourseButton
+                  topic={topic}
+                  onClick={() => handleClick(topic)}
+                ></CourseButton>
+              ))}
+            </div>
           </>
         )}
 
