@@ -1,0 +1,21 @@
+{
+  "id": "chatcmpl-7lGRl5DQIVQV1EhqILdbZuMDFEaAm",
+  "object": "chat.completion",
+  "created": 1691498993,
+  "model": "gpt-4",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Certainly! Blockchain is a decentralized and distributed digital ledger that records transactions across multiple computers. It is often described as a 'chain' of blocks because new transactions are grouped together into blocks and added to the existing chain in a linear and chronological order."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 32,
+    "completion_tokens": 93,
+    "total_tokens": 125
+  }
+}

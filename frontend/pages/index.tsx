@@ -16,6 +16,8 @@ export default function Home() {
   const [userPrompt, setUserPrompt] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
 
+  const topics = ["blockchain", "decentralisation", "oracles"];
+
   const numOfQuestions = 3;
   // const prompt = `Explain ${topic} in the simplest terms possible - as if for a beginner.
   // Then send me ${numOfQuestions} question to test my knowledge.
@@ -40,22 +42,20 @@ export default function Home() {
     };
   });
 
-  // useEffect(() => {
-  //   console.log("Mesages changed to: ", messages);
-  // }, [messages]);
-
   /* Button area stuff */
 
-  const handleClick = async () => {
+  const handleClick = async (topic: string) => {
     setLoading(true); // set loading to true
-    const firstPrompt = {
+
+    const initialPrompt = `Could you describe ${topic} in terms that an intermediate learner might know about. Use one paragraph for now.`;
+    const firstPromptMessage = {
       // create first prompt prompt
       role: "user",
-      content: prompt,
+      content: initialPrompt,
     };
-    console.log("Initial prompt: ", firstPrompt);
-    // setTimeout(() => {}, 2000);
-    callApi([firstPrompt]); // pass it onto api call
+
+    console.log("Initial prompt: ", firstPromptMessage);
+    callApi([firstPromptMessage]); // pass it onto api call
   };
 
   /* core API call functionality */
@@ -64,14 +64,16 @@ export default function Home() {
     console.log("Sending these messages: ", messagesToSend);
     setLoading(true);
 
-    const response = await fetch("/api/feynman", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-      },
-      body: JSON.stringify({ messages: messagesToSend }),
-    });
+    // const response = await fetch("/api/feynman-chat", {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //     "Access-Control-Allow-Origin": "*",
+    //   },
+    //   body: JSON.stringify({ messages: messagesToSend }),
+    // });
+
+    const response = await fetch(`/topics/${topic}/initialDefinition.json`);
 
     // const response = await fetch("/testResponse.json");
 
@@ -89,11 +91,11 @@ export default function Home() {
     setLoading(false);
   };
 
-  /* Interaction zone */
+  /* Pre-test zone */
 
   const requestSimplification = async () => {
     // send message to api with a prompt like: could you simplify this - for someone who's a beginner?
-    const simplificationRequest = `Ok :) Could you simplify this - for someone who's a beginner?`;
+    const simplificationRequest = `Ok! Could you simplify this - in terms a beginner would understand?`;
     const simplificationMessage = {
       role: "user",
       content: simplificationRequest,
@@ -116,6 +118,8 @@ export default function Home() {
     setUserPrompt("");
     callApi(updatedMessages);
   };
+
+  /* Test zone */
 
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     // Update the userInput state with the current input value
@@ -151,6 +155,12 @@ export default function Home() {
     }
   };
 
+  /* Certification time */
+
+  const generateCertification = async () => {
+    // probably will take the form of a dall-e generated icon?
+  };
+
   return (
     <div>
       <Header></Header>
@@ -162,10 +172,12 @@ export default function Home() {
         {!messages.length && !loading && (
           <>
             <h1>Hello learner! What would you like to learn today?</h1>
-            <CourseButton
-              topic="blockchain"
-              onClick={handleClick}
-            ></CourseButton>
+            {topics.map((topic) => (
+              <CourseButton
+                topic={topic}
+                onClick={() => handleClick(topic)}
+              ></CourseButton>
+            ))}
           </>
         )}
 
@@ -204,7 +216,7 @@ export default function Home() {
                   Simplify
                 </button>
                 <button
-                  onClick={requestSimplification}
+                  onClick={startTest}
                   className=" right-2 top-1/2 transform -translate-y-1/2 px-4 py-2 bg-blue-500 hover:bg-blue-700 text-white rounded-lg focus:ring-blue-500 focus:border-blue-500"
                 >
                   Test yourself
