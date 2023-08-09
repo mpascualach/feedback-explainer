@@ -1,18 +1,6 @@
 // Import necessary types from Next.js
 import type { NextApiRequest, NextApiResponse } from "next";
 
-// // Check if required environment variable is set
-// if (!process.env.OPEN_AI_API_KEY) {
-//   console.log("Nope no API key");
-//   throw new Error("Missing env var from OpenAI");
-// } else {
-//   console.log("OpenAI API Key is set");
-// }
-
-// // Define ChatGPTAgent type as a union of user and system
-// type ChatGPTAgent = "user" | "system";
-
-// Define ChatGPTMessage interface
 interface ChatGPTMessage {
   role: "user" | "assistant";
   content: string;

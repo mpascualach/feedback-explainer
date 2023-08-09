@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import Header from "@/components/Header";
 import CourseButton from "@/components/CourseButton";
 import InputBox from "@/components/InputBox"; // Adjust the path accordingly
+import { call } from "viem/actions";
 
 interface Message {
   role: string;
@@ -21,7 +22,8 @@ export default function Home() {
   // Send me these questions one by one - wait until I've answered one before sending me the next one.
   // Once I've answered all ${numOfQuestions} of your questions correctly, end your next message with "Well done!".`;
 
-  const prompt = `Could you describe ${topic} in terms that an intermediate learner might know about. Use at least three paragraphs.`;
+  const prompt = `Could you describe ${topic} in terms that an intermediate learner might know about. Use one paragraph for now.`;
+  const [testing, setTesting] = useState<boolean>();
 
   useEffect(() => {
     const handleEnterKey = (event: KeyboardEvent) => {
@@ -91,6 +93,28 @@ export default function Home() {
 
   const requestSimplification = async () => {
     // send message to api with a prompt like: could you simplify this - for someone who's a beginner?
+    const simplificationRequest = `Ok :) Could you simplify this - for someone who's a beginner?`;
+    const simplificationMessage = {
+      role: "user",
+      content: simplificationRequest,
+    };
+
+    const updatedMessages = [...messages, simplificationMessage];
+    setMessages(updatedMessages);
+    setUserPrompt("");
+  };
+
+  const startTest = async () => {
+    const testRequest = `Ok! Send me ${numOfQuestions} questions to test my knowledge.`;
+    const testMessage = {
+      role: "user",
+      content: testRequest,
+    };
+
+    const updatedMessages = [...messages, testMessage];
+    setMessages(updatedMessages);
+    setUserPrompt("");
+    callApi(updatedMessages);
   };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -164,13 +188,29 @@ export default function Home() {
           <></>
         ) : (
           <>
-            <button onClick={requestSimplification}>Simplify</button>
-            <InputBox
-              userPrompt={userPrompt}
-              handleSubmit={handleSubmit}
-              handleInputChange={handleInputChange}
-              handleTextareaResize={handleTextareaResize}
-            />
+            {testing ? (
+              <InputBox
+                userPrompt={userPrompt}
+                handleSubmit={handleSubmit}
+                handleInputChange={handleInputChange}
+                handleTextareaResize={handleTextareaResize}
+              />
+            ) : (
+              <div className="flex relative w-6/12 justify-around text-xl">
+                <button
+                  onClick={requestSimplification}
+                  className=" right-2 top-1/2 transform -translate-y-1/2 px-4 py-2 bg-blue-500 hover:bg-blue-700 text-white rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                >
+                  Simplify
+                </button>
+                <button
+                  onClick={requestSimplification}
+                  className=" right-2 top-1/2 transform -translate-y-1/2 px-4 py-2 bg-blue-500 hover:bg-blue-700 text-white rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                >
+                  Test yourself
+                </button>
+              </div>
+            )}
           </>
         )}
       </main>
