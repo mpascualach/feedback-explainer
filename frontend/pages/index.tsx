@@ -15,11 +15,11 @@ export default function Home() {
   const [userPrompt, setUserPrompt] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
 
-  // const numOfQuestions = 3;
-  // const prompt = `Explain ${topic} in the simplest terms possible - as if for a beginner.
-  // Then send me ${numOfQuestions} question to test my knowledge.
-  // Send me these questions one by one - wait until I've answered one before sending me the next one.
-  // Only after I've answered all ${numOfQuestions} of your questions should you end your message with "Well done!".`;
+  const numOfQuestions = 3;
+  const prompt = `Explain ${topic} in the simplest terms possible - as if for a beginner.
+  Then send me ${numOfQuestions} question to test my knowledge.
+  Send me these questions one by one - wait until I've answered one before sending me the next one.
+  Once I've answered all ${numOfQuestions} of your questions correctly, end your next message with "Well done!".`;
 
   useEffect(() => {
     const handleEnterKey = (event: KeyboardEvent) => {
@@ -36,14 +36,48 @@ export default function Home() {
     };
   });
 
+  // useEffect(() => {
+  //   console.log("Mesages changed to: ", messages);
+  // }, [messages]);
+
   const handleClick = async () => {
-    setLoading(true);
+    setLoading(true); // set loading to true
     const firstPrompt = {
+      // create first prompt prompt
       role: "user",
-      content: "prompt",
+      content: prompt,
     };
     // setTimeout(() => {}, 2000);
-    callApi([firstPrompt]);
+    callApi([firstPrompt]); // pass it onto api call
+  };
+
+  const callApi = async (messagesToSend: Message[]) => {
+    console.log("Sending these messages: ", messagesToSend);
+    setLoading(true);
+
+    const response = await fetch("/api/feynman", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+      body: JSON.stringify({ messages: messagesToSend }),
+    });
+
+    // const response = await fetch("/testResponse.json");
+
+    const data = await response.json();
+    const assistantMessage = data.choices[0].message;
+    assistantMessage.content = assistantMessage.content.replace(
+      /\n/g,
+      "<br />"
+    );
+
+    await setMessages((prevMessages) => {
+      return [...prevMessages, assistantMessage];
+    });
+
+    setLoading(false);
   };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -59,50 +93,25 @@ export default function Home() {
     textarea.style.height = `${textarea.scrollHeight}px`; // Set the height to the actual scrollHeight
   };
 
-  const handleSubmit = (
+  const handleSubmit = async (
     event: React.FormEvent<HTMLFormElement> | KeyboardEvent
   ) => {
     event.preventDefault();
 
     if (userPrompt.trim() !== "") {
       const userMessage = {
+        // craft user message
         role: "user",
         content: userPrompt,
       };
 
-      setMessages((prevMessages) => [...prevMessages, userMessage]);
-      setUserPrompt("");
-      console.log("New messages?: ", messages);
-      // callApi(messages);
+      const updatedMessages = [...messages, userMessage];
+      setMessages(updatedMessages);
+
+      callApi(updatedMessages);
     } else {
       console.log("Please enter something before submitting");
     }
-  };
-
-  const callApi = async (messages: Message[]) => {
-    setLoading(true);
-
-    const response = await fetch("/api/feynman", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-      },
-      body: JSON.stringify({ messages: messages }),
-    });
-
-    // const response = await fetch("/testResponse.json");
-
-    const data = await response.json();
-    const assistantMessage = data.choices[0].message;
-    assistantMessage.content = assistantMessage.content.replace(
-      /\n/g,
-      "<br />"
-    );
-
-    setMessages((prevMessages) => [...prevMessages, assistantMessage]);
-    console.log("Setting messages as: ", messages);
-    setLoading(false);
   };
 
   return (

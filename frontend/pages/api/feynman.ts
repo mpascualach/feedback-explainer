@@ -33,7 +33,7 @@ export default async function handler(
 ) {
   try {
     const payload: promptPayload = {
-      model: "gpt-3.5-turbo",
+      model: "gpt-4",
       messages: req.body.messages, // build out these messages
       temperature: 1,
       max_tokens: 500,
