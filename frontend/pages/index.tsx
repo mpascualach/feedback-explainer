@@ -15,12 +15,11 @@ export default function Home() {
   const [userPrompt, setUserPrompt] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
 
-  const prompt = `Explain ${topic} in the simplest terms possible - as if for a beginner - and then send me a question to test my knowledge `;
-
-  useEffect(() => {
-    console.log("Resetting messages");
-    setMessages([]);
-  }, []);
+  // const numOfQuestions = 3;
+  // const prompt = `Explain ${topic} in the simplest terms possible - as if for a beginner.
+  // Then send me ${numOfQuestions} question to test my knowledge.
+  // Send me these questions one by one - wait until I've answered one before sending me the next one.
+  // Only after I've answered all ${numOfQuestions} of your questions should you end your message with "Well done!".`;
 
   useEffect(() => {
     const handleEnterKey = (event: KeyboardEvent) => {
@@ -41,34 +40,10 @@ export default function Home() {
     setLoading(true);
     const firstPrompt = {
       role: "user",
-      content: prompt,
+      content: "prompt",
     };
     // setTimeout(() => {}, 2000);
-    try {
-      // const response = await fetch("/testResponse.json");
-      const response = await fetch("/api/feynman", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-        body: JSON.stringify({ messages: [firstPrompt] }),
-      });
-
-      const data = await response.json();
-      const assistantMessage = data.choices[0].message;
-      assistantMessage.content = assistantMessage.content.replace(
-        /\n/g,
-        "<br />"
-      );
-
-      setMessages((prevMessages) => [...prevMessages, assistantMessage]);
-
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching API:", error);
-      setLoading(false);
-    }
+    callApi([firstPrompt]);
   };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -97,16 +72,27 @@ export default function Home() {
 
       setMessages((prevMessages) => [...prevMessages, userMessage]);
       setUserPrompt("");
-      callApi();
+      console.log("New messages?: ", messages);
+      // callApi(messages);
     } else {
       console.log("Please enter something before submitting");
     }
   };
 
-  const callApi = async () => {
+  const callApi = async (messages: Message[]) => {
     setLoading(true);
-    const response = await fetch("/testResponse2.json");
-    console.log("Response: ", response);
+
+    const response = await fetch("/api/feynman", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+      body: JSON.stringify({ messages: messages }),
+    });
+
+    // const response = await fetch("/testResponse.json");
+
     const data = await response.json();
     const assistantMessage = data.choices[0].message;
     assistantMessage.content = assistantMessage.content.replace(
@@ -115,7 +101,7 @@ export default function Home() {
     );
 
     setMessages((prevMessages) => [...prevMessages, assistantMessage]);
-
+    console.log("Setting messages as: ", messages);
     setLoading(false);
   };
 
@@ -126,21 +112,27 @@ export default function Home() {
         className={`flex flex-col items-center justify-between p-12`}
         style={{ height: "90vh" }}
       >
+        {/* button to start whole thing */}
         {!messages.length && !loading && (
           <Button topic="blockchain" onClick={handleClick}></Button>
         )}
+
+        {/* chain of messages */}
         <div className="relative flex flex-col justify-between overflow-scroll">
           {messages.map((message, index) => (
-            <div
-              dangerouslySetInnerHTML={{ __html: message.content }}
-              className={`p-4 text-white text-xl w-full h-auto ${
-                index > 0 ? "border-t border-gray-300" : ""
-              }`}
-              key={index}
-            />
+            <>
+              <div
+                dangerouslySetInnerHTML={{ __html: message.content }}
+                className={`p-4 text-white text-xl w-full h-auto`}
+                key={index}
+              />
+              <hr className="mt-10 mb-10"></hr>
+            </>
           ))}
         </div>
         {loading ? <p>Loading...</p> : <></>}
+
+        {/* input box */}
         {!messages.length ? (
           <></>
         ) : (
