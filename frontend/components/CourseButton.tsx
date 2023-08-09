@@ -6,7 +6,7 @@ interface ButtonProps {
   onClick: () => void;
 }
 
-const Button: React.FC<ButtonProps> = ({ topic, onClick }) => {
+const CourseButton: React.FC<ButtonProps> = ({ topic, onClick }) => {
   return (
     <div className="flex-grow-0 flex-shrink">
       <button
@@ -19,4 +19,4 @@ const Button: React.FC<ButtonProps> = ({ topic, onClick }) => {
   );
 };
 
-export default Button;
+export default CourseButton;

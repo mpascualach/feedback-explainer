@@ -1,7 +1,7 @@
-import { Inter } from "next/font/google";
 import React, { useEffect, useState, useRef } from "react";
 import Header from "@/components/Header";
-import Button from "@/components/Button";
+import CourseButton from "@/components/CourseButton";
+import InputBox from "@/components/InputBox"; // Adjust the path accordingly
 
 interface Message {
   role: string;
@@ -16,10 +16,12 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
 
   const numOfQuestions = 3;
-  const prompt = `Explain ${topic} in the simplest terms possible - as if for a beginner.
-  Then send me ${numOfQuestions} question to test my knowledge.
-  Send me these questions one by one - wait until I've answered one before sending me the next one.
-  Once I've answered all ${numOfQuestions} of your questions correctly, end your next message with "Well done!".`;
+  // const prompt = `Explain ${topic} in the simplest terms possible - as if for a beginner.
+  // Then send me ${numOfQuestions} question to test my knowledge.
+  // Send me these questions one by one - wait until I've answered one before sending me the next one.
+  // Once I've answered all ${numOfQuestions} of your questions correctly, end your next message with "Well done!".`;
+
+  const prompt = `Could you describe ${topic} in terms that an intermediate learner might know about. Use at least three paragraphs.`;
 
   useEffect(() => {
     const handleEnterKey = (event: KeyboardEvent) => {
@@ -40,6 +42,8 @@ export default function Home() {
   //   console.log("Mesages changed to: ", messages);
   // }, [messages]);
 
+  /* Button area stuff */
+
   const handleClick = async () => {
     setLoading(true); // set loading to true
     const firstPrompt = {
@@ -47,9 +51,12 @@ export default function Home() {
       role: "user",
       content: prompt,
     };
+    console.log("Initial prompt: ", firstPrompt);
     // setTimeout(() => {}, 2000);
     callApi([firstPrompt]); // pass it onto api call
   };
+
+  /* core API call functionality */
 
   const callApi = async (messagesToSend: Message[]) => {
     console.log("Sending these messages: ", messagesToSend);
@@ -80,6 +87,12 @@ export default function Home() {
     setLoading(false);
   };
 
+  /* Interaction zone */
+
+  const requestSimplification = async () => {
+    // send message to api with a prompt like: could you simplify this - for someone who's a beginner?
+  };
+
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     // Update the userInput state with the current input value
     setUserPrompt(event.target.value);
@@ -107,7 +120,7 @@ export default function Home() {
 
       const updatedMessages = [...messages, userMessage];
       setMessages(updatedMessages);
-
+      setUserPrompt("");
       callApi(updatedMessages);
     } else {
       console.log("Please enter something before submitting");
@@ -121,22 +134,27 @@ export default function Home() {
         className={`flex flex-col items-center justify-between p-12`}
         style={{ height: "90vh" }}
       >
-        {/* button to start whole thing */}
+        {/* courses zone */}
         {!messages.length && !loading && (
-          <Button topic="blockchain" onClick={handleClick}></Button>
+          <>
+            <h1>Hello learner! What would you like to learn today?</h1>
+            <CourseButton
+              topic="blockchain"
+              onClick={handleClick}
+            ></CourseButton>
+          </>
         )}
 
         {/* chain of messages */}
         <div className="relative flex flex-col justify-between overflow-scroll">
           {messages.map((message, index) => (
-            <>
+            <div key={index}>
               <div
                 dangerouslySetInnerHTML={{ __html: message.content }}
                 className={`p-4 text-white text-xl w-full h-auto`}
-                key={index}
               />
               <hr className="mt-10 mb-10"></hr>
-            </>
+            </div>
           ))}
         </div>
         {loading ? <p>Loading...</p> : <></>}
@@ -145,23 +163,15 @@ export default function Home() {
         {!messages.length ? (
           <></>
         ) : (
-          <form className="w-full relative" onSubmit={handleSubmit}>
-            <textarea
-              rows={1}
-              id="user_prompt"
-              className="text-xl bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              value={userPrompt}
-              onChange={handleInputChange}
-              onInput={handleTextareaResize}
-              style={{ maxWidth: "calc(100% - 120px)" }}
+          <>
+            <button onClick={requestSimplification}>Simplify</button>
+            <InputBox
+              userPrompt={userPrompt}
+              handleSubmit={handleSubmit}
+              handleInputChange={handleInputChange}
+              handleTextareaResize={handleTextareaResize}
             />
-            <button
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 px-4 py-2 bg-blue-500 hover:bg-blue-700 text-white rounded-lg focus:ring-blue-500 focus:border-blue-500"
-              type="submit"
-            >
-              Submit
-            </button>
-          </form>
+          </>
         )}
       </main>
     </div>
