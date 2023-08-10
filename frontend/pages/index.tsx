@@ -2,7 +2,9 @@ import React, { useEffect, useState, useRef } from "react";
 import Header from "@/components/Header";
 import CourseButton from "@/components/CourseButton";
 import InputBox from "@/components/InputBox"; // Adjust the path accordingly
-import { call } from "viem/actions";
+
+import { ethers } from "ethers";
+import contractAbi from "../utils/certificationAbi.json";
 
 interface Message {
   role: string;
@@ -10,6 +12,10 @@ interface Message {
 }
 
 export default function Home() {
+  const provider = new ethers.providers.JsonRpcProvider(
+    process.env.JSON_RPC_PROVIDER
+  );
+
   const [topic, setTopic] = useState<string>("blockchain");
 
   const [loading, setLoading] = useState<boolean>(false);
