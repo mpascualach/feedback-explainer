@@ -2,6 +2,8 @@
 const fs = require("fs-extra");
 const path = require("path");
 
+require("hardhat-gas-reporter");
+
 task("compile-with-abi-move", "Compile contracts with abi move").setAction(
   async () => {
     await run("compile");
@@ -32,6 +34,10 @@ task("compile-with-abi-move", "Compile contracts with abi move").setAction(
 );
 
 module.exports = {
+  networks: {
+    hardhat: {},
+    localhost: {},
+  },
   solidity: "0.8.19",
   tasks: {
     "compile-with-abi-move": {},
