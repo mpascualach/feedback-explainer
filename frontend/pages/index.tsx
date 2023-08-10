@@ -176,7 +176,7 @@ export default function Home() {
       >
         {/* courses zone */}
         {!messages.length && !loading && (
-          <>
+          <div className="w-full text-center">
             <h1>Hello learner! What would you like to learn today?</h1>
             <div>
               {topics.map((topic) => (
@@ -186,7 +186,7 @@ export default function Home() {
                 ></CourseButton>
               ))}
             </div>
-          </>
+          </div>
         )}
 
         {/* chain of messages */}

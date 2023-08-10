@@ -8,7 +8,7 @@ interface ButtonProps {
 
 const CourseButton: React.FC<ButtonProps> = ({ topic, onClick }) => {
   return (
-    <div className="flex-grow-0 flex-shrink">
+    <div className="flex-grow-0 flex-shrink mt-10 mb-10">
       <button
         onClick={onClick}
         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg capitalize p-4 pl-6 pr-6"
