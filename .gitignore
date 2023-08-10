@@ -2,3 +2,21 @@
 node_modules
 
 directory_structure.js
+
+
+# Hardhat
+artifacts/
+
+cache/
+tmp/
+
+logs
+*.log
+
+.vscode/
+.DS_Store
+
+docs/
+generated/
+
+coverage/
