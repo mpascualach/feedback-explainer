@@ -12,10 +12,6 @@ interface Message {
 }
 
 export default function Home() {
-  const provider = new ethers.providers.JsonRpcProvider(
-    process.env.JSON_RPC_PROVIDER
-  );
-
   const [topic, setTopic] = useState<string>("blockchain");
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -47,6 +43,37 @@ export default function Home() {
       document.removeEventListener("keydown", handleEnterKey);
     };
   });
+
+  useEffect(() => {
+    const provider = new ethers.JsonRpcProvider(process.env.JSON_RPC_PROVIDER);
+
+    const contractAddress = "0x1EfC1c192ca2c297BB028B4Df2b1Dd841d104869";
+
+    const contract = new ethers.Contract(
+      contractAddress,
+      contractAbi.toString(),
+      provider
+    );
+
+    console.log("Contract: ", contract);
+
+    // const contract = new ethers.Contract(
+    //   contractAddress,
+    //   contractAbi,
+    //   provider
+    // );
+
+    // const contractInterface = new ethers.utils.Interface(contractAbi);
+
+    async function fetchData() {
+      try {
+        // const data = await contract.getData().call();
+        // setContractData();
+      } catch (err) {
+        // console.log("Error reading data from contract:", error);
+      }
+    }
+  }, []);
 
   /* Button area stuff */
 
