@@ -6,6 +6,8 @@ import InputBox from "@/components/InputBox"; // Adjust the path accordingly
 import { ethers } from "ethers";
 import contractAbi from "../utils/certificationAbi.json";
 
+import { useMoralis } from "react-moralis";
+
 interface Message {
   role: string;
   content: string;
@@ -35,7 +37,11 @@ export default function Home() {
   const contractAddress = "0x1EfC1c192ca2c297BB028B4Df2b1Dd841d104869";
   const contract = new ethers.Contract(contractAddress, contractAbi, provider);
 
+  const { authenticate, isAuthenticated, user, isWeb3Enabled } = useMoralis();
+
   useEffect(() => {
+    // just testing this
+    authenticate();
     generateCertification();
   }, []);
 
@@ -53,6 +59,15 @@ export default function Home() {
       document.removeEventListener("keydown", handleEnterKey);
     };
   });
+
+  /* Certification time */
+
+  const generateCertification = async () => {
+    const address = await window.ethereum.send("eth_requestAccounts");
+    const title = `Certification of ${topic} complete`;
+    const description = `This is to certify that ${topic} has been understood to such a point where ${address.result[0]} is no longer a beginner.`;
+    // const certification = await contract.mintCertification();
+  };
 
   /* Button area stuff */
 
@@ -165,13 +180,6 @@ export default function Home() {
     } else {
       console.log("Please enter something before submitting");
     }
-  };
-
-  /* Certification time */
-
-  const generateCertification = async () => {
-    //
-    const certification = await contract.mintCertification();
   };
 
   return (

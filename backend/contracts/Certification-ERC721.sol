@@ -6,25 +6,40 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 // this is a platform that would certify any certifications being passed through here as NFTs
 contract Certification is ERC721, Ownable {
-    // set latestToken to 0 at first - ready to increment with each mint
     uint256 private latestTokenId = 0;
-
-    // map token ids with issue date - is useful for storage purposes
     mapping(uint256 => uint256) public tokenIssueDate;
 
-    // construct Certification contract
+    struct CertificationMetadata {
+        string title;
+        string description;
+        string imageURI;
+        address awardee;
+        uint256 issueDate;
+    }
+    mapping(uint256 => CertificationMetadata) public certificationMetadata;
+
     constructor() ERC721("Certification", "CERT") {}
 
-    // this function initiates the minting process
-    function mintCertification() external onlyOwner {
+    function mintCertification(
+        string memory title,
+        string memory description,
+        string memory imageURI
+    ) external onlyOwner {
         latestTokenId++;
         uint256 tokenId = latestTokenId;
 
         _mint(msg.sender, tokenId);
 
         uint256 issueDate = block.timestamp;
-
         tokenIssueDate[tokenId] = issueDate;
+
+        certificationMetadata[tokenId] = CertificationMetadata({
+            title: title,
+            description: description,
+            imageURI: imageURI,
+            awardee: msg.sender,
+            issueDate: issueDate
+        });
 
         emit CertificationMinted(tokenId, msg.sender, issueDate);
     }
@@ -33,7 +48,6 @@ contract Certification is ERC721, Ownable {
         return latestTokenId;
     }
 
-    // declare event to be triggered when certification is minted
     event CertificationMinted(
         uint256 tokenId,
         address awardee,
