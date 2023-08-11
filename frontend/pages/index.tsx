@@ -51,11 +51,9 @@ export default function Home() {
 
     const contract = new ethers.Contract(
       contractAddress,
-      contractAbi.toString(),
+      contractAbi,
       provider
     );
-
-    console.log("Contract: ", contract);
 
     // const contract = new ethers.Contract(
     //   contractAddress,
