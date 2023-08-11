@@ -6,10 +6,10 @@ export default async function handler(
 ) {
   try {
     const payload = {
-        "prompt": req.body.imagePrompt,
-        "n": 1,
-        "size": "1024x1024" 
-    }
+      prompt: req.body.imagePrompt,
+      n: 1,
+      size: "1024x1024",
+    };
 
     const response = await fetch(
       "https://api.openai.com/v1/images/generations",
@@ -19,9 +19,12 @@ export default async function handler(
           Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
         },
         method: "POST",
-        body: JSON.stringify(payload);
+        body: JSON.stringify(payload),
       }
     );
+
+    const data = await response.json();
+    return res.json(data);
   } catch (error) {
     console.log("The Error: ", error);
   }
