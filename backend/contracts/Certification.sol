@@ -16,29 +16,27 @@ contract Certification is ERC721, Ownable {
     constructor() ERC721("Certification", "CERT") {}
 
     // this function initiates the minting process
-    function mintCertification(
-        address awardee,
-        uint256 issueDate,
-        string memory issuerName
-    ) external onlyOwner {
-        latestTokenId++; // increment token
-        uint256 tokenId = latestTokenId; // current latestTokenId;
+    function mintCertification() external onlyOwner {
+        latestTokenId++;
+        uint256 tokenId = latestTokenId;
 
-        // use ERC721's minting protocol
-        _mint(awardee, tokenId);
+        _mint(msg.sender, tokenId);
 
-        // create new entry in tokenIssueDate mini-ledger
+        uint256 issueDate = block.timestamp;
+
         tokenIssueDate[tokenId] = issueDate;
 
-        // notify blockchain that a certification has been minted
-        emit CertificationMinted(tokenId, awardee, issueDate, issuerName);
+        emit CertificationMinted(tokenId, msg.sender, issueDate);
+    }
+
+    function getLatestTokenId() external view returns (uint256) {
+        return latestTokenId;
     }
 
     // declare event to be triggered when certification is minted
     event CertificationMinted(
         uint256 tokenId,
         address awardee,
-        uint256 issueDate,
-        string issuerName
+        uint256 issueDate
     );
 }

@@ -20,3 +20,5 @@ docs/
 generated/
 
 coverage/
+
+solidity-flattener/

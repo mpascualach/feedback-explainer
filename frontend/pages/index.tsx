@@ -29,6 +29,16 @@ export default function Home() {
   const prompt = `Could you describe ${topic} in terms that an intermediate learner might know about. Use one paragraph for now.`;
   const [testing, setTesting] = useState<boolean>();
 
+  const [points, setPoints] = useState<number>(0);
+
+  const provider = new ethers.JsonRpcProvider(process.env.JSON_RPC_PROVIDER);
+  const contractAddress = "0x1EfC1c192ca2c297BB028B4Df2b1Dd841d104869";
+  const contract = new ethers.Contract(contractAddress, contractAbi, provider);
+
+  useEffect(() => {
+    generateCertification();
+  }, []);
+
   useEffect(() => {
     const handleEnterKey = (event: KeyboardEvent) => {
       if (event.key === "Enter" && !event.shiftKey) {
@@ -43,35 +53,6 @@ export default function Home() {
       document.removeEventListener("keydown", handleEnterKey);
     };
   });
-
-  useEffect(() => {
-    const provider = new ethers.JsonRpcProvider(process.env.JSON_RPC_PROVIDER);
-
-    const contractAddress = "0x1EfC1c192ca2c297BB028B4Df2b1Dd841d104869";
-
-    const contract = new ethers.Contract(
-      contractAddress,
-      contractAbi,
-      provider
-    );
-
-    // const contract = new ethers.Contract(
-    //   contractAddress,
-    //   contractAbi,
-    //   provider
-    // );
-
-    // const contractInterface = new ethers.utils.Interface(contractAbi);
-
-    async function fetchData() {
-      try {
-        // const data = await contract.getData().call();
-        // setContractData();
-      } catch (err) {
-        // console.log("Error reading data from contract:", error);
-      }
-    }
-  }, []);
 
   /* Button area stuff */
 
@@ -189,7 +170,8 @@ export default function Home() {
   /* Certification time */
 
   const generateCertification = async () => {
-    // probably will take the form of a dall-e generated icon?
+    //
+    const certification = await contract.mintCertification();
   };
 
   return (
