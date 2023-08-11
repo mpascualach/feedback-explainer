@@ -6,7 +6,7 @@ export default async function handler(
 ) {
   try {
     const payload = {
-        "prompt": "a cute icon representing blockchain",
+        "prompt": req.body.imagePrompt,
         "n": 1,
         "size": "1024x1024" 
     }
