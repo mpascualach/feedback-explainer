@@ -1,4 +1,3 @@
-// Import necessary types from Next.js
 import type { NextApiRequest, NextApiResponse } from "next";
 
 interface ChatGPTMessage {
