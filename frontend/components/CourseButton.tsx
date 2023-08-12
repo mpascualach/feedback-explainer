@@ -14,18 +14,6 @@ const CourseButton: React.FC<ButtonProps> = ({
 }) => {
   const [toggle, setToggle] = useState<boolean>();
 
-  useEffect(() => {
-    const handleDocumentClick = (e: MouseEvent) => {
-      setToggle(false);
-    };
-
-    document.addEventListener("click", handleDocumentClick);
-
-    return () => {
-      document.removeEventListener("click", handleDocumentClick);
-    };
-  }, []);
-
   return (
     <div className="flex-grow-0 flex-shrink mt-10 mb-10 flex justify-center">
       <button
