@@ -3,10 +3,11 @@ import Header from "@/components/Header";
 import CourseButton from "@/components/CourseButton";
 import InputBox from "@/components/InputBox"; // Adjust the path accordingly
 
+import Web3Modal from "web3modal";
+import WalletConnectProvider from "@walletconnect/web3-provider";
 import { ethers } from "ethers";
-import contractAbi from "../utils/certificationAbi.json";
-
-import { useMoralis } from "react-moralis";
+import { contractAddress } from "../constants/ethConstants";
+// import { useMoralis } from "react-moralis";
 
 interface Message {
   role: string;
@@ -21,32 +22,19 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
 
   const topics = ["blockchain", "decentralisation", "oracles"];
-
   const numOfQuestions = 3;
-  // const prompt = `Explain ${topic} in the simplest terms possible - as if for a beginner.
-  // Then send me ${numOfQuestions} question to test my knowledge.
-  // Send me these questions one by one - wait until I've answered one before sending me the next one.
-  // Once I've answered all ${numOfQuestions} of your questions correctly, end your next message with "Well done!".`;
-
   const prompt = `Could you describe ${topic} in terms that an intermediate learner might know about. Use one paragraph for now.`;
-  const [testing, setTesting] = useState<boolean>();
 
+  const [testing, setTesting] = useState<boolean>();
   const [points, setPoints] = useState<number>(0);
 
-  const provider = new ethers.providers.JsonRpcProvider(
-    process.env.JSON_RPC_PROVIDER
-  );
-  const contractAddress = "0x1EfC1c192ca2c297BB028B4Df2b1Dd841d104869";
-  const contract = new ethers.Contract(contractAddress, contractAbi, provider);
+  // const provider = new ethers.providers.JsonRpcProvider(
+  //   process.env.JSON_RPC_PROVIDER
+  // );
+  // const contractAddress = "0x1EfC1c192ca2c297BB028B4Df2b1Dd841d104869";
+  // const contract = new ethers.Contract(contractAddress, contractAbi, provider);
 
-  const { authenticate, isAuthenticated, user, isWeb3Enabled } = useMoralis();
-
-  useEffect(() => {
-    // just testing this
-    console.log("Contract: ", contract);
-    authenticate();
-    generateCertification();
-  }, []);
+  // const { authenticate, isAuthenticated, user, isWeb3Enabled } = useMoralis();
 
   useEffect(() => {
     const handleEnterKey = (event: KeyboardEvent) => {
@@ -66,14 +54,43 @@ export default function Home() {
   /* Certification time */
 
   const generateCertification = async () => {
-    const ethereum = (window as any).ethereum;
-    const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+    const abi = [
+      "function mintCertification(string memory title,string memory description,string memory imageURI,string memory issuer) external",
+    ];
 
-    const provider = new ethers.Web3Provider(ethereum);
-    const address = await window.ethereum.send("eth_requestAccounts");
+    const web3Modal = new Web3Modal({
+      cacheProvider: true,
+      providerOptions: {
+        walletconnect: {
+          package: WalletConnectProvider,
+        },
+      },
+    });
+    const instance = await web3Modal.connect();
+    console.log("Instance: ", instance);
+    const provider = new ethers.BrowserProvider(instance);
+    console.log("Provider: ", provider);
+    const signer = await provider.getSigner();
+    console.log("Signer: ", signer);
+    const smartContract = new ethers.Contract(contractAddress, abi, provider);
+    console.log("Smart contract: ", smartContract);
+    console.log("Smart contract methods: ", smartContract.functions);
+    const contractWithSigner = smartContract.connect(signer);
+    console.log("Contract with signer: ", contractWithSigner);
+
     const title = `Certification of ${topic} complete`;
-    const description = `This is to certify that ${topic} has been understood to such a point where ${address.result[0]} is no longer a beginner.`;
-    const certification = await contract.mintCertification();
+    const description = `This is to certify that ${topic} has been understood to such a point where ${signer.address} is no longer a beginner.`;
+    const imageURI = "Test";
+    const issuer = "Feynman";
+
+    const tx = await contractWithSigner.mintCertification(
+      title,
+      description,
+      imageURI,
+      issuer
+    );
+
+    await tx.wait();
   };
 
   /* Button area stuff */
