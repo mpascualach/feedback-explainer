@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
+
 import Header from "@/components/Header";
 import CourseButton from "@/components/CourseButton";
-import InputBox from "@/components/InputBox"; // Adjust the path accordingly
+import InputBox from "@/components/InputBox";
 
 import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { ethers } from "ethers";
 import { contractAddress } from "../constants/ethConstants";
-// import { useMoralis } from "react-moralis";
 
 interface Message {
   role: string;
@@ -23,18 +23,13 @@ export default function Home() {
 
   const topics = ["blockchain", "decentralisation", "oracles"];
   const numOfQuestions = 3;
-  const prompt = `Could you describe ${topic} in terms that an intermediate learner might know about. Use one paragraph for now.`;
 
+  const [simplificationPossible, setSimplificationPossiblity] =
+    useState<boolean>(true);
+  const [tutorial, setTutorial] = useState<boolean>();
+  const [summary, setSummary] = useState<boolean>();
   const [testing, setTesting] = useState<boolean>();
   const [points, setPoints] = useState<number>(0);
-
-  // const provider = new ethers.providers.JsonRpcProvider(
-  //   process.env.JSON_RPC_PROVIDER
-  // );
-  // const contractAddress = "0x1EfC1c192ca2c297BB028B4Df2b1Dd841d104869";
-  // const contract = new ethers.Contract(contractAddress, contractAbi, provider);
-
-  // const { authenticate, isAuthenticated, user, isWeb3Enabled } = useMoralis();
 
   useEffect(() => {
     const handleEnterKey = (event: KeyboardEvent) => {
@@ -67,16 +62,11 @@ export default function Home() {
       },
     });
     const instance = await web3Modal.connect();
-    console.log("Instance: ", instance);
     const provider = new ethers.BrowserProvider(instance);
-    console.log("Provider: ", provider);
     const signer = await provider.getSigner();
-    console.log("Signer: ", signer);
     const smartContract = new ethers.Contract(contractAddress, abi, provider);
-    console.log("Smart contract: ", smartContract);
-    console.log("Smart contract methods: ", smartContract.functions);
-    const contractWithSigner = smartContract.connect(signer);
-    console.log("Contract with signer: ", contractWithSigner);
+    const contractWithSigner: ethers.BaseContract =
+      smartContract.connect(signer);
 
     const title = `Certification of ${topic} complete`;
     const description = `This is to certify that ${topic} has been understood to such a point where ${signer.address} is no longer a beginner.`;
@@ -115,16 +105,14 @@ export default function Home() {
     console.log("Sending these messages: ", messagesToSend);
     setLoading(true);
 
-    // const response = await fetch("/api/feynman-chat", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     "Access-Control-Allow-Origin": "*",
-    //   },
-    //   body: JSON.stringify({ messages: messagesToSend }),
-    // });
-
-    const response = await fetch(`/topics/${topic}/initialDefinition.json`);
+    const response = await fetch("/api/feynman-chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+      body: JSON.stringify({ messages: messagesToSend }),
+    });
 
     // const response = await fetch("/testResponse.json");
 
@@ -144,9 +132,23 @@ export default function Home() {
 
   /* Pre-test zone */
 
+  const startTutorial = async (topic: string) => {
+    // hide buttons
+    // send message to api such as: could you summarise the concept of decentralisation for me?
+
+    setTutorial(true);
+    const tutorialRequest = `Could you summarise the concept of ${topic} for me? This will be in the context of blockchain-based technology`;
+    const tutorialMessage = {
+      role: "user",
+      content: tutorialRequest,
+    };
+    callApi([tutorialMessage]);
+  };
+
   const requestSimplification = async () => {
+    console.log("Requesting simplification");
     // send message to api with a prompt like: could you simplify this - for someone who's a beginner?
-    const simplificationRequest = `Ok! Could you simplify this - in terms a beginner would understand?`;
+    const simplificationRequest = `Ok! Could you simplify this?`;
     const simplificationMessage = {
       role: "user",
       content: simplificationRequest,
@@ -155,19 +157,30 @@ export default function Home() {
     const updatedMessages = [...messages, simplificationMessage];
     setMessages(updatedMessages);
     setUserPrompt("");
+    callApi(updatedMessages);
+
+    setSimplificationPossiblity(false);
   };
 
-  const startTest = async () => {
-    const testRequest = `Ok! Send me ${numOfQuestions} questions to test my knowledge. Each time I get a question right, add '+1' at the end of your message.`;
-    const testMessage = {
-      role: "user",
-      content: testRequest,
-    };
+  const prepareSummary = async () => {
+    // enable input box
+  };
 
-    const updatedMessages = [...messages, testMessage];
-    setMessages(updatedMessages);
-    setUserPrompt("");
-    callApi(updatedMessages);
+  const submitSummary = async () => {
+    // send message to api with a prompt like: so is it like?
+  };
+
+  const startTest = async (topic: string) => {
+    // hide buttons or tutorial
+    // const testRequest = `Ok! Send me ${numOfQuestions} questions to test my knowledge. Each time I get a question right, add '+1' at the end of your message.`;
+    // const testMessage = {
+    //   role: "user",
+    //   content: testRequest,
+    // };
+    // const updatedMessages = [...messages, testMessage];
+    // setMessages(updatedMessages);
+    // setUserPrompt("");
+    // callApi(updatedMessages);
   };
 
   /* Test zone */
@@ -215,61 +228,97 @@ export default function Home() {
       >
         {/* courses zone */}
         {!messages.length && !loading && (
-          <div className="w-full text-center">
-            <h1>Hello learner! What would you like to learn today?</h1>
-            <div>
-              {topics.map((topic) => (
+          <div className="w-full text-center flex flex-col items-center">
+            <h1 style={{ "font-size": "2rem" }}>
+              Hello learner! What would you like to test yourself on?
+            </h1>
+            <div className="w-4/5">
+              {topics.map((topic, index) => (
                 <CourseButton
                   topic={topic}
-                  onClick={() => handleClick(topic)}
+                  onTutorialSelect={() => startTutorial(topic)}
+                  onTestSelect={() => startTest(topic)}
+                  key={index}
                 ></CourseButton>
               ))}
             </div>
           </div>
         )}
+        {/* maybe ensure that not all categories can be toggled at once? */}
 
-        {/* chain of messages */}
-        <div className="relative flex flex-col justify-between overflow-scroll">
-          {messages.map((message, index) => (
-            <div key={index}>
-              <div
-                dangerouslySetInnerHTML={{ __html: message.content }}
-                className={`p-4 text-white text-xl w-full h-auto`}
-              />
-              <hr className="mt-10 mb-10"></hr>
+        {/* tutorial zone */}
+
+        {tutorial && (
+          <div className="relative h-full">
+            <div
+              className="relative flex flex-col justify-between overflow-scroll"
+              style={{ height: "90%" }}
+            >
+              {messages.map((message, index) => (
+                <div
+                  key={index}
+                  className="rounded mt-3 mb-3"
+                  style={{
+                    backgroundColor:
+                      message.role === "assistant" ? "#2e2c2c" : "inherit",
+                  }}
+                >
+                  <div
+                    dangerouslySetInnerHTML={{ __html: message.content }}
+                    className={`p-4 text-white text-xl w-full h-auto pt-8 pb-8`}
+                  />{" "}
+                </div>
+              ))}
+              {loading ? <p>Loading...</p> : <></>}
             </div>
-          ))}
-        </div>
-        {loading ? <p>Loading...</p> : <></>}
-
-        {/* input box */}
-        {!messages.length ? (
-          <></>
-        ) : (
-          <>
-            {testing ? (
-              <InputBox
-                userPrompt={userPrompt}
-                handleSubmit={handleSubmit}
-                handleInputChange={handleInputChange}
-                handleTextareaResize={handleTextareaResize}
-              />
-            ) : (
-              <div className="flex relative w-6/12 justify-around text-xl">
+            <div className="flex relative w-6/12 justify-around text-xl w-full justify-center">
+              {simplificationPossible ? (
                 <button
                   onClick={requestSimplification}
-                  className=" right-2 top-1/2 transform -translate-y-1/2 px-4 py-2 bg-blue-500 hover:bg-blue-700 text-white rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  className="ml-4 mr-4 px-4 py-2 bg-green-500 hover:bg-green-700 text-white rounded-lg focus:ring-blue-500 focus:border-blue-500"
                 >
                   Simplify
                 </button>
+              ) : (
                 <button
-                  onClick={startTest}
-                  className=" right-2 top-1/2 transform -translate-y-1/2 px-4 py-2 bg-blue-500 hover:bg-blue-700 text-white rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  onClick={prepareSummary}
+                  className="ml-4 mr-4 px-4 py-2 bg-green-500 hover:bg-green-700 text-white rounded-lg focus:ring-blue-500 focus:border-blue-500"
                 >
-                  Test yourself
+                  Summarise
                 </button>
-              </div>
-            )}
+              )}
+
+              <button
+                onClick={startTest}
+                className="ml-3 mr-3 px-4 py-2 bg-yellow-700 hover:bg-yellow-900 text-white rounded-lg focus:ring-blue-500 focus:border-blue-500"
+              >
+                Test Yourself
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* chain of messages */}
+        {testing && (
+          <>
+            <div className="relative flex flex-col justify-between overflow-scroll">
+              {messages.map((message, index) => (
+                <div key={index}>
+                  <div
+                    dangerouslySetInnerHTML={{ __html: message.content }}
+                    className={`p-4 text-white text-xl w-full h-auto`}
+                  />
+                  <hr className="mt-10 mb-10"></hr>
+                </div>
+              ))}
+              {loading ? <p>Loading...</p> : <></>}
+            </div>
+            <InputBox
+              userPrompt={userPrompt}
+              handleSubmit={handleSubmit}
+              handleInputChange={handleInputChange}
+              handleTextareaResize={handleTextareaResize}
+            />
           </>
         )}
       </main>
