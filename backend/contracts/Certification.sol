@@ -14,6 +14,7 @@ contract Certification is ERC721, Ownable {
         string description;
         string imageURI;
         address awardee;
+        string issuer;
         uint256 issueDate;
     }
     mapping(uint256 => CertificationMetadata) public certificationMetadata;
@@ -23,7 +24,8 @@ contract Certification is ERC721, Ownable {
     function mintCertification(
         string memory title,
         string memory description,
-        string memory imageURI
+        string memory imageURI,
+        string memory issuer
     ) external onlyOwner {
         latestTokenId++;
         uint256 tokenId = latestTokenId;
@@ -38,10 +40,18 @@ contract Certification is ERC721, Ownable {
             description: description,
             imageURI: imageURI,
             awardee: msg.sender,
+            issuer: issuer,
             issueDate: issueDate
         });
 
-        emit CertificationMinted(tokenId, msg.sender, issueDate);
+        emit CertificationMinted(
+            tokenId,
+            title,
+            description,
+            msg.sender,
+            issuer,
+            issueDate
+        );
     }
 
     function getLatestTokenId() external view returns (uint256) {
@@ -50,7 +60,10 @@ contract Certification is ERC721, Ownable {
 
     event CertificationMinted(
         uint256 tokenId,
+        string title,
+        string description,
         address awardee,
+        string issuer,
         uint256 issueDate
     );
 }
