@@ -33,7 +33,9 @@ export default function Home() {
 
   const [points, setPoints] = useState<number>(0);
 
-  const provider = new ethers.JsonRpcProvider(process.env.JSON_RPC_PROVIDER);
+  const provider = new ethers.providers.JsonRpcProvider(
+    process.env.JSON_RPC_PROVIDER
+  );
   const contractAddress = "0x1EfC1c192ca2c297BB028B4Df2b1Dd841d104869";
   const contract = new ethers.Contract(contractAddress, contractAbi, provider);
 
@@ -41,6 +43,7 @@ export default function Home() {
 
   useEffect(() => {
     // just testing this
+    console.log("Contract: ", contract);
     authenticate();
     generateCertification();
   }, []);
@@ -63,10 +66,14 @@ export default function Home() {
   /* Certification time */
 
   const generateCertification = async () => {
+    const ethereum = (window as any).ethereum;
+    const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+
+    const provider = new ethers.Web3Provider(ethereum);
     const address = await window.ethereum.send("eth_requestAccounts");
     const title = `Certification of ${topic} complete`;
     const description = `This is to certify that ${topic} has been understood to such a point where ${address.result[0]} is no longer a beginner.`;
-    // const certification = await contract.mintCertification();
+    const certification = await contract.mintCertification();
   };
 
   /* Button area stuff */
@@ -134,7 +141,7 @@ export default function Home() {
   };
 
   const startTest = async () => {
-    const testRequest = `Ok! Send me ${numOfQuestions} questions to test my knowledge.`;
+    const testRequest = `Ok! Send me ${numOfQuestions} questions to test my knowledge. Each time I get a question right, add '+1' at the end of your message.`;
     const testMessage = {
       role: "user",
       content: testRequest,
