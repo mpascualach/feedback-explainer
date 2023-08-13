@@ -62,11 +62,11 @@ export default function Home() {
     };
   });
 
-  useEffect(() => {
-    if (messages.length > 0) {
-      setMessages([]);
-    }
-  });
+  // useEffect(() => {
+  //   if (messages.length > 0) {
+  //     setMessages([]);
+  //   }
+  // });
 
   const resetApp = () => {
     setCoursesEnabled(true);
@@ -80,22 +80,6 @@ export default function Home() {
     setMintingStarted(false);
     setMessages([]);
     setUserPrompt("");
-  };
-
-  /* Button area stuff */
-
-  const handleClick = async (topic: string) => {
-    setLoading(true); // set loading to true
-
-    const initialPrompt = `Could you describe ${topic} in terms that an intermediate learner might know about. Use one paragraph for now.`;
-    const firstPromptMessage = {
-      // create first prompt prompt
-      role: "user",
-      content: initialPrompt,
-    };
-
-    console.log("Initial prompt: ", firstPromptMessage);
-    callApi([firstPromptMessage]); // pass it onto api call
   };
 
   /* core API call functionality */
@@ -116,6 +100,7 @@ export default function Home() {
     // const response = await fetch("/testResponse.json");
 
     const data = await response.json();
+    console.log("Data: ", data);
     const assistantMessage = data.choices[0].message;
     assistantMessage.content = assistantMessage.content.replace(
       /\n/g,
