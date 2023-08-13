@@ -11,9 +11,6 @@ import WalletConnectProvider from "@walletconnect/web3-provider";
 import { ethers } from "ethers";
 import { contractAddress } from "../constants/ethConstants";
 
-import { Configuration, OpenAIApi } from "openai";
-require("dotenv").config();
-
 interface Message {
   role: string;
   content: string;
@@ -45,6 +42,8 @@ export default function Home() {
   const [mintingStarted, setMintingStarted] = useState<boolean>();
   const [certificationMinted, setCertificationMinted] = useState<boolean>();
 
+  // still working on test mode
+
   const [testing, setTesting] = useState<boolean>();
   const [points, setPoints] = useState<number>(0);
 
@@ -64,9 +63,10 @@ export default function Home() {
   });
 
   useEffect(() => {
-    console.log(certificationUrls);
-    console.log(certificationUrl);
-  }, [certificationUrls]);
+    if (messages.length > 0) {
+      setMessages([]);
+    }
+  }, []);
 
   /* Button area stuff */
 
@@ -248,17 +248,8 @@ export default function Home() {
     const data = await response.json();
     console.log("Data: ", data);
     setCertificationUrls(data.data);
-    setCertificationUrl(data.data[0]);
-    // setCertificationUrl(
-    //   "https://oaidalleapiprodscus.blob.core.windows.net/private/org-1B7Wa8qKPRWXkwJBymJ4H8nG/user-kh7tYZ7RpQuhlrwhKG95bcYG/img-3LLDmm1l7XxFWaQG1XMm6oiG.png?st=2023-08-13T08%3A28%3A19Z&se=2023-08-13T10%3A28%3A19Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-08-12T17%3A22%3A40Z&ske=2023-08-13T17%3A22%3A40Z&sks=b&skv=2021-08-06&sig=2h9ZpfAx7WadIgV7lJOgk3llx2JOU4HSN5%2B453vI9mg%3D"
-    // );
-
-    // fetch(apiUrl, requestOptions as any)
-    //   .then((response) => response.json())
-    //   .then((data) => {
-    //     console.log("Data: ", data);
-    //   });
-    // console.log("REs: ", res);
+    setCertificationUrl(data.data[0].url);
+    setLoading(false);
   };
 
   const mintCertification = async () => {
@@ -293,9 +284,8 @@ export default function Home() {
       imageURI,
       issuer
     );
-
+    setMintingStarted(true);
     await tx.wait();
-    console.log("Certification minted");
     postMintingProcess();
   };
 
@@ -306,6 +296,7 @@ export default function Home() {
     setCertificationStarted(false);
     setCoursesEnabled(true);
     setUserPrompt("");
+    setMintingStarted(false);
 
     setTimeout(() => {
       setCertificationMinted(false);
@@ -331,6 +322,16 @@ export default function Home() {
             <p className="text-sm">
               Check your wallet to see your certification.
             </p>
+          </div>
+        )}
+
+        {mintingStarted && (
+          <div
+            className="bg-green-100 border-t border-b border-green-500 text-green-700 px-4 py-3 absolute"
+            role="alert"
+          >
+            <p className="font-bold">Minting in progress</p>
+            <p className="text-sm">Just hang in there!</p>
           </div>
         )}
 
@@ -454,14 +455,28 @@ export default function Home() {
         )}
 
         {certificationStarted && (
-          <>
+          <div className="flex justify-center items-center h-full w-full">
             {loading ? (
-              <p>Loading...</p>
+              <div className="h-3/4 w-9/12">
+                <div className="p-5 bg-gray-800 rounded text-xl">
+                  <p className="mt-10 mb-10">
+                    While we're waiting, here's a blockchain-themed joke for
+                    you:
+                  </p>
+                  <hr style={{ opacity: "0.2" }}></hr>
+                  <p className="mt-10 mb-10">
+                    Why did the blockchain developer go to therapy?
+                  </p>
+                  <p className="mt-10 mb-10">
+                    Because they had too many unresolved blocks in their life!
+                  </p>
+                </div>
+              </div>
             ) : (
               <div
-                className="bg-cover rounded w-9/12 h-3/4 flex justify-center items-center cursor-pointer"
+                className="bg-cover rounded w-9/12 h-3/4 flex justify-center items-center cursor-pointer bg-center"
                 style={{
-                  background: certificationUrl
+                  backgroundImage: certificationUrl
                     ? `url(${certificationUrl})`
                     : `url('/testImg.png')`,
                   backgroundSize: "cover",
@@ -481,7 +496,7 @@ export default function Home() {
                 </div>
               </div>
             )}
-          </>
+          </div>
         )}
       </main>
     </div>
