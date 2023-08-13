@@ -6,9 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "build-verbose": "next build --verbose",
-    "build-debug": "next build --debug"
+    "lint": "next lint"
   },
   "dependencies": {
     "@ethersproject/providers": "^5.7.2",
@@ -16,7 +14,7 @@
     "@types/node": "20.4.8",
     "@types/react": "18.2.19",
     "@types/react-dom": "18.2.7",
-    "@web3uikit/web3": "^0.3.2",
+    "@walletconnect/web3-provider": "^1.8.0",
     "autoprefixer": "10.4.14",
     "connectkit": "^1.5.0",
     "dotenv": "^16.3.1",
