@@ -10,6 +10,7 @@ import { ethers } from "ethers";
 import { contractAddress } from "../constants/ethConstants";
 
 import { Configuration, OpenAIApi } from "openai";
+require("dotenv").config();
 
 interface Message {
   role: string;
@@ -34,6 +35,9 @@ export default function Home() {
   const [certificationReady, setCertificationReady] = useState<boolean>();
   const [certificationStarted, setCertificationStarted] = useState<boolean>();
 
+  const [certificationUrls, setCertificationUrls] = useState<string[]>([]);
+  const [certificationUrl, setCertificationUrl] = useState<string>();
+
   const [testing, setTesting] = useState<boolean>();
   const [points, setPoints] = useState<number>(0);
 
@@ -52,32 +56,44 @@ export default function Home() {
     };
   });
 
+  useEffect(() => {
+    prepareCertificate();
+  }, []);
+
   /* Certification time */
   const prepareCertificate = async () => {
+    setCertificationStarted(true);
     setLoading(true);
-    const imagePrompt = `A cute image representing ${topic}`;
-    const apiUrl = `https://api.openai.com/v1/images/generations`;
+    // const imagePrompt = `A cute image representing ${topic}`;
+    // const apiUrl = `https://api.openai.com/v1/images/generations`;
 
-    const requestOptions = {
-      method: "POST",
-      headers: {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-        },
-      },
-      body: JSON.stringify({ prompt: imagePrompt }),
-    };
+    // const response = await fetch("/api/feynman-certification", {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //     "Access-Control-Allow-Origin": "*",
+    //   },
+    //   body: JSON.stringify({ prompt: imagePrompt }),
+    // });
 
-    fetch(apiUrl, requestOptions as any)
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Data: ", data);
-      });
+    // const data = await response.json();
+    // console.log("Data: ", data);
+    // setCertificationUrls(data.data);
+    // setCertificationUrl(data.data[0]);
+
+    setCertificationUrl(
+      "https://oaidalleapiprodscus.blob.core.windows.net/private/org-1B7Wa8qKPRWXkwJBymJ4H8nG/user-kh7tYZ7RpQuhlrwhKG95bcYG/img-3LLDmm1l7XxFWaQG1XMm6oiG.png?st=2023-08-13T08%3A28%3A19Z&se=2023-08-13T10%3A28%3A19Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-08-12T17%3A22%3A40Z&ske=2023-08-13T17%3A22%3A40Z&sks=b&skv=2021-08-06&sig=2h9ZpfAx7WadIgV7lJOgk3llx2JOU4HSN5%2B453vI9mg%3D"
+    );
+
+    // fetch(apiUrl, requestOptions as any)
+    //   .then((response) => response.json())
+    //   .then((data) => {
+    //     console.log("Data: ", data);
+    //   });
     // console.log("REs: ", res);
   };
 
-  const generateCertification = async () => {
+  const mintCertification = async () => {
     const abi = [
       "function mintCertification(string memory title,string memory description,string memory imageURI,string memory issuer) external",
     ];
@@ -275,33 +291,27 @@ export default function Home() {
 
         {tutorial && (
           <div className="relative h-full">
-            {!certificationStarted ? (
-              <div
-                className="relative flex flex-col justify-between overflow-scroll"
-                style={{ height: "90%" }}
-              >
-                {messages.map((message, index) => (
+            <div
+              className="relative flex flex-col justify-between overflow-scroll"
+              style={{ height: "90%" }}
+            >
+              {messages.map((message, index) => (
+                <div
+                  key={index}
+                  className="rounded mt-3 mb-3"
+                  style={{
+                    backgroundColor:
+                      message.role === "assistant" ? "#2e2c2c" : "inherit",
+                  }}
+                >
                   <div
-                    key={index}
-                    className="rounded mt-3 mb-3"
-                    style={{
-                      backgroundColor:
-                        message.role === "assistant" ? "#2e2c2c" : "inherit",
-                    }}
-                  >
-                    <div
-                      dangerouslySetInnerHTML={{ __html: message.content }}
-                      className={`p-4 text-white text-xl w-full h-auto pt-8 pb-8`}
-                    />{" "}
-                  </div>
-                ))}
-                {loading ? <p>Loading...</p> : <></>}
-              </div>
-            ) : (
-              <div>
-                <h1>Here's your certificate</h1>
-              </div>
-            )}
+                    dangerouslySetInnerHTML={{ __html: message.content }}
+                    className={`p-4 text-white text-xl w-full h-auto pt-8 pb-8`}
+                  />{" "}
+                </div>
+              ))}
+              {loading ? <p>Loading...</p> : <></>}
+            </div>
             {!summaryStarted ? (
               <div className="flex relative w-6/12 text-xl justify-center">
                 {simplificationPossible ? (
@@ -361,6 +371,13 @@ export default function Home() {
               handleTextareaResize={handleTextareaResize}
             />
           </>
+        )}
+
+        {certificationStarted && (
+          <div
+            className="bg-cover rounded w-9/12 h-3/4"
+            style={{ backgroundImage: `url(${certificationUrl})` }}
+          ></div>
         )}
       </main>
     </div>
