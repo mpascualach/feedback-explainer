@@ -85,7 +85,7 @@ export default function Home() {
   /* core API call functionality */
 
   const callApi = async (messagesToSend: Message[]) => {
-    console.log("Sending these messages: ", messagesToSend);
+    console.log("Environment: ", process.env);
     setLoading(true);
 
     const response = await fetch("/api/feynman-chat", {
@@ -100,7 +100,6 @@ export default function Home() {
     // const response = await fetch("/testResponse.json");
 
     const data = await response.json();
-    console.log("Data: ", data);
     const assistantMessage = data.choices[0].message;
     assistantMessage.content = assistantMessage.content.replace(
       /\n/g,

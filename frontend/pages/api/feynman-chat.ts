@@ -42,3 +42,7 @@ export default async function handler(
     console.log("The Error: ", error);
   }
 }
+
+export const config = {
+  type: "experimental-background",
+};
