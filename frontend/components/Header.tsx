@@ -10,7 +10,6 @@ import React from "react";
 // };
 
 const Header = (handleClick: any) => {
-  console.log("Handle Click: ", handleClick);
   return (
     <header className="p-4 text-white text-center font-harmattan text-4xl font-normal shadow-white relative">
       <p onClick={handleClick} className="cursor-pointer">

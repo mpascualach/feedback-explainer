@@ -1,5 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { Configuration, OpenAIApi } from "openai";
 
 export default async function handler(
   req: NextApiRequest,

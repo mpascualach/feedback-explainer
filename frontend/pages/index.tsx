@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 
 import Head from "next/head";
 
+import { CustomHead } from "@/components/CustomHead";
 import Header from "@/components/Header";
 import CourseButton from "@/components/CourseButton";
 import InputBox from "@/components/InputBox";
@@ -87,12 +88,17 @@ export default function Home() {
 
   /* core API call functionality */
 
-  const callApi = async (messagesToSend: Message[]) => {
+  const callApi = async (messagesToSend: Message[], simulateError = false) => {
+    console.log("Simulate error?: ", simulateError);
     try {
-      console.log("Environment: ", process.env);
       setLoading(true);
 
-      const response = await fetch("/api/feynman-chat", {
+      let apiPath = "/api/feynman-chat";
+      if (simulateError) {
+        apiPath = "/api/mock-error";
+      }
+
+      const response = await fetch(apiPath, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -126,6 +132,9 @@ export default function Home() {
       setLoading(false);
     } catch (error) {
       console.error("API request error:", error);
+      resetApp();
+      setErrorMessage((error as any).message);
+      setIsErrorVisible(true);
       setLoading(false);
     }
   };
@@ -141,7 +150,7 @@ export default function Home() {
       role: "user",
       content: tutorialRequest,
     };
-    callApi([tutorialMessage]);
+    callApi([tutorialMessage], true);
   };
 
   const requestSimplification = async () => {
@@ -313,21 +322,21 @@ export default function Home() {
 
   return (
     <div>
-      <Head>
-        <title>Feynman</title>
-      </Head>
-      <Header onClick={resetApp}></Header>
+      <CustomHead title="Feynman"></CustomHead>
+      <Header></Header>
       <main
         className={`flex flex-col items-center justify-between p-12`}
         style={{ height: "90vh" }}
       >
         {isErrorVisible && (
           <div
-            className="bg-red-100 border-t border-b border-red-500 text-red-700 px-4 py-3 absolute"
+            className="bg-red-100 border-t border-b border-red-500 text-red-700 px-4 py-3 absolute rounded"
             role="alert"
+            style={{ bottom: "20%" }}
           >
             <p className="font-bold">Error</p>
             <p className="text-sm">{errorMessage}</p>
+            <p className="text-sm">Please try again later</p>
           </div>
         )}
         {certificationMinted && (
