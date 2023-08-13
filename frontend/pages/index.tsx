@@ -63,6 +63,11 @@ export default function Home() {
     };
   });
 
+  useEffect(() => {
+    console.log(certificationUrls);
+    console.log(certificationUrl);
+  }, [certificationUrls]);
+
   /* Button area stuff */
 
   const handleClick = async (topic: string) => {
@@ -103,7 +108,10 @@ export default function Home() {
       "<br />"
     );
 
-    if (summaryStarted && assistantMessage.content.includes("Yes")) {
+    if (
+      (summaryStarted && assistantMessage.content.includes("Yes")) ||
+      assistantMessage.content.includes("Exactly")
+    ) {
       setCertificationReady(true);
     }
 
@@ -117,6 +125,7 @@ export default function Home() {
   /* Tutorial zone */
 
   const startTutorial = async (topic: string) => {
+    setTopic(topic);
     setCoursesEnabled(false);
     setTutorial(true);
     const tutorialRequest = `Could you summarise the concept of ${topic} for me? This will be in the context of blockchain-based technology. If at any point I summarise it correctly, please start your messae with 'Yes, that's correct!'`;
@@ -221,6 +230,8 @@ export default function Home() {
     setCertificationStarted(true);
     setTutorial(false);
     setTesting(false);
+    // yeah I should probably work with a string-based selector rather than a set of boolean ones...
+
     setLoading(true);
     const imagePrompt = `A cute image representing ${topic}`;
     const apiUrl = `https://api.openai.com/v1/images/generations`;
@@ -238,7 +249,6 @@ export default function Home() {
     console.log("Data: ", data);
     setCertificationUrls(data.data);
     setCertificationUrl(data.data[0]);
-
     // setCertificationUrl(
     //   "https://oaidalleapiprodscus.blob.core.windows.net/private/org-1B7Wa8qKPRWXkwJBymJ4H8nG/user-kh7tYZ7RpQuhlrwhKG95bcYG/img-3LLDmm1l7XxFWaQG1XMm6oiG.png?st=2023-08-13T08%3A28%3A19Z&se=2023-08-13T10%3A28%3A19Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-08-12T17%3A22%3A40Z&ske=2023-08-13T17%3A22%3A40Z&sks=b&skv=2021-08-06&sig=2h9ZpfAx7WadIgV7lJOgk3llx2JOU4HSN5%2B453vI9mg%3D"
     // );
@@ -296,6 +306,10 @@ export default function Home() {
     setCertificationStarted(false);
     setCoursesEnabled(true);
     setUserPrompt("");
+
+    setTimeout(() => {
+      setCertificationMinted(false);
+    }, 3000);
   };
 
   return (
@@ -440,20 +454,34 @@ export default function Home() {
         )}
 
         {certificationStarted && (
-          <div
-            className="bg-cover rounded w-9/12 h-3/4 flex justify-center items-center cursor-pointer"
-            style={{ backgroundImage: `url(${certificationUrl})` }}
-            onClick={mintCertification}
-          >
-            <div
-              className="bg-gray-800 p-5 rounded flex flex-col items-center text-xl"
-              style={{ height: "fit-content" }}
-            >
-              <span className="capitalize"> {topic} Certification</span>
-              <br></br>
-              <span>Click to mint</span>
-            </div>
-          </div>
+          <>
+            {loading ? (
+              <p>Loading...</p>
+            ) : (
+              <div
+                className="bg-cover rounded w-9/12 h-3/4 flex justify-center items-center cursor-pointer"
+                style={{
+                  background: certificationUrl
+                    ? `url(${certificationUrl})`
+                    : `url('/testImg.png')`,
+                  backgroundSize: "cover",
+                }}
+                onClick={mintCertification}
+              >
+                <div
+                  className="bg-gray-800 p-5 rounded flex flex-col items-center text-xl"
+                  style={{ height: "fit-content" }}
+                >
+                  <span className="capitalize">
+                    {" "}
+                    {topic} Certification of Understanding
+                  </span>
+                  <br></br>
+                  <span>Click to mint</span>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </main>
     </div>
