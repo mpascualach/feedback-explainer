@@ -10,10 +10,13 @@ const Web3ConnectButton = ConnectButton as React.FC;
 //   }
 // };
 
-const Header = () => {
+const Header = (handleClick: any) => {
+  console.log("Handle Click: ", handleClick);
   return (
     <header className="p-4 text-white text-center font-harmattan text-4xl font-normal shadow-white relative">
-      Feynman
+      <p onClick={handleClick} className="cursor-pointer">
+        Feynman
+      </p>
       <div className="absolute right-0" style={{ top: "25%" }}>
         <Web3ConnectButton />
         {/* <input type="button" value="Connect Wallet" onClick={connect}></input> */}

@@ -68,6 +68,20 @@ export default function Home() {
     }
   }, []);
 
+  const resetApp = () => {
+    setCoursesEnabled(true);
+    setTutorial(false);
+    setTesting(false);
+    setCertificationStarted(false);
+    setCertificationMinted(false);
+    setCertificationReady(false);
+    setSimplificationPossiblity(false);
+    startSummary(false);
+    setMintingStarted(false);
+    setMessages([]);
+    setUserPrompt("");
+  };
+
   /* Button area stuff */
 
   const handleClick = async (topic: string) => {
@@ -308,7 +322,7 @@ export default function Home() {
       <Head>
         <title>Feynman</title>
       </Head>
-      <Header></Header>
+      <Header onClick={resetApp}></Header>
       <main
         className={`flex flex-col items-center justify-between p-12`}
         style={{ height: "90vh" }}
