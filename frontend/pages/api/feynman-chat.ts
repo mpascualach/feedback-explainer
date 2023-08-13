@@ -22,7 +22,7 @@ export default async function handler(
     const payload: promptPayload = {
       model: "gpt-4",
       messages: req.body.messages, // build out these messages
-      temperature: 1,
+      temperature: 0.7,
       max_tokens: 500,
     };
 

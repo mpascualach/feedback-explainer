@@ -9,6 +9,8 @@ import WalletConnectProvider from "@walletconnect/web3-provider";
 import { ethers } from "ethers";
 import { contractAddress } from "../constants/ethConstants";
 
+import { Configuration, OpenAIApi } from "openai";
+
 interface Message {
   role: string;
   content: string;
@@ -27,7 +29,11 @@ export default function Home() {
   const [simplificationPossible, setSimplificationPossiblity] =
     useState<boolean>(true);
   const [tutorial, setTutorial] = useState<boolean>();
-  const [summary, setSummary] = useState<boolean>();
+  const [summaryStarted, startSummary] = useState<boolean>();
+
+  const [certificationReady, setCertificationReady] = useState<boolean>();
+  const [certificationStarted, setCertificationStarted] = useState<boolean>();
+
   const [testing, setTesting] = useState<boolean>();
   const [points, setPoints] = useState<number>(0);
 
@@ -47,6 +53,29 @@ export default function Home() {
   });
 
   /* Certification time */
+  const prepareCertificate = async () => {
+    setLoading(true);
+    const imagePrompt = `A cute image representing ${topic}`;
+    const apiUrl = `https://api.openai.com/v1/images/generations`;
+
+    const requestOptions = {
+      method: "POST",
+      headers: {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        },
+      },
+      body: JSON.stringify({ prompt: imagePrompt }),
+    };
+
+    fetch(apiUrl, requestOptions as any)
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Data: ", data);
+      });
+    // console.log("REs: ", res);
+  };
 
   const generateCertification = async () => {
     const abi = [
@@ -73,7 +102,7 @@ export default function Home() {
     const imageURI = "Test";
     const issuer = "Feynman";
 
-    const tx = await contractWithSigner.mintCertification(
+    const tx = await (contractWithSigner as any).mintCertification(
       title,
       description,
       imageURI,
@@ -133,21 +162,17 @@ export default function Home() {
   /* Pre-test zone */
 
   const startTutorial = async (topic: string) => {
-    // hide buttons
-    // send message to api such as: could you summarise the concept of decentralisation for me?
-
-    setTutorial(true);
-    const tutorialRequest = `Could you summarise the concept of ${topic} for me? This will be in the context of blockchain-based technology`;
-    const tutorialMessage = {
-      role: "user",
-      content: tutorialRequest,
-    };
-    callApi([tutorialMessage]);
+    prepareCertificate();
+    // setTutorial(true);
+    // const tutorialRequest = `Could you summarise the concept of ${topic} for me? This will be in the context of blockchain-based technology. If at any point I summarise it correctly, please start your messae with 'Yes, that's correct!'`;
+    // const tutorialMessage = {
+    //   role: "user",
+    //   content: tutorialRequest,
+    // };
+    // callApi([tutorialMessage]);
   };
 
   const requestSimplification = async () => {
-    console.log("Requesting simplification");
-    // send message to api with a prompt like: could you simplify this - for someone who's a beginner?
     const simplificationRequest = `Ok! Could you simplify this?`;
     const simplificationMessage = {
       role: "user",
@@ -229,7 +254,7 @@ export default function Home() {
         {/* courses zone */}
         {!messages.length && !loading && (
           <div className="w-full text-center flex flex-col items-center">
-            <h1 style={{ "font-size": "2rem" }}>
+            <h1 style={{ fontSize: "2rem" }}>
               Hello learner! What would you like to test yourself on?
             </h1>
             <div className="w-4/5">
@@ -250,51 +275,67 @@ export default function Home() {
 
         {tutorial && (
           <div className="relative h-full">
-            <div
-              className="relative flex flex-col justify-between overflow-scroll"
-              style={{ height: "90%" }}
-            >
-              {messages.map((message, index) => (
-                <div
-                  key={index}
-                  className="rounded mt-3 mb-3"
-                  style={{
-                    backgroundColor:
-                      message.role === "assistant" ? "#2e2c2c" : "inherit",
-                  }}
-                >
-                  <div
-                    dangerouslySetInnerHTML={{ __html: message.content }}
-                    className={`p-4 text-white text-xl w-full h-auto pt-8 pb-8`}
-                  />{" "}
-                </div>
-              ))}
-              {loading ? <p>Loading...</p> : <></>}
-            </div>
-            <div className="flex relative w-6/12 justify-around text-xl w-full justify-center">
-              {simplificationPossible ? (
-                <button
-                  onClick={requestSimplification}
-                  className="ml-4 mr-4 px-4 py-2 bg-green-500 hover:bg-green-700 text-white rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                >
-                  Simplify
-                </button>
-              ) : (
-                <button
-                  onClick={prepareSummary}
-                  className="ml-4 mr-4 px-4 py-2 bg-green-500 hover:bg-green-700 text-white rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                >
-                  Summarise
-                </button>
-              )}
-
-              <button
-                onClick={startTest}
-                className="ml-3 mr-3 px-4 py-2 bg-yellow-700 hover:bg-yellow-900 text-white rounded-lg focus:ring-blue-500 focus:border-blue-500"
+            {!certificationStarted ? (
+              <div
+                className="relative flex flex-col justify-between overflow-scroll"
+                style={{ height: "90%" }}
               >
-                Test Yourself
-              </button>
-            </div>
+                {messages.map((message, index) => (
+                  <div
+                    key={index}
+                    className="rounded mt-3 mb-3"
+                    style={{
+                      backgroundColor:
+                        message.role === "assistant" ? "#2e2c2c" : "inherit",
+                    }}
+                  >
+                    <div
+                      dangerouslySetInnerHTML={{ __html: message.content }}
+                      className={`p-4 text-white text-xl w-full h-auto pt-8 pb-8`}
+                    />{" "}
+                  </div>
+                ))}
+                {loading ? <p>Loading...</p> : <></>}
+              </div>
+            ) : (
+              <div>
+                <h1>Here's your certificate</h1>
+              </div>
+            )}
+            {!summaryStarted ? (
+              <div className="flex relative w-6/12 text-xl justify-center">
+                {simplificationPossible ? (
+                  <button
+                    onClick={requestSimplification}
+                    className="ml-4 mr-4 px-4 py-2 bg-green-500 hover:bg-green-700 text-white rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    Simplify
+                  </button>
+                ) : (
+                  <></>
+                  // <button
+                  //   onClick={prepareSummary}
+                  //   className="ml-4 mr-4 px-4 py-2 bg-green-500 hover:bg-green-700 text-white rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  // >
+                  //   Summarise
+                  // </button>
+                )}
+
+                <button
+                  onClick={() => startTest}
+                  className="ml-3 mr-3 px-4 py-2 bg-yellow-700 hover:bg-yellow-900 text-white rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                >
+                  Test Yourself
+                </button>
+              </div>
+            ) : (
+              <InputBox
+                userPrompt={userPrompt}
+                handleSubmit={submitSummary}
+                handleInputChange={handleInputChange}
+                handleTextareaResize={handleTextareaResize}
+              />
+            )}
           </div>
         )}
 
