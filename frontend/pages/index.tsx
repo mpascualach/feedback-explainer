@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 
+import Head from "next/head";
+
 import Header from "@/components/Header";
 import CourseButton from "@/components/CourseButton";
 import InputBox from "@/components/InputBox";
@@ -24,8 +26,10 @@ export default function Home() {
   const [userPrompt, setUserPrompt] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
 
-  const topics = ["blockchain", "decentralisation", "oracles"];
+  const topics = ["blockchain", "decentralisation", "oracles", "ERC1155"];
   const numOfQuestions = 3;
+
+  const [coursesEnabled, setCoursesEnabled] = useState<boolean>(true);
 
   const [simplificationPossible, setSimplificationPossiblity] =
     useState<boolean>(true);
@@ -58,10 +62,6 @@ export default function Home() {
       document.removeEventListener("keydown", handleEnterKey);
     };
   });
-
-  useEffect(() => {
-    prepareCertificate();
-  }, []);
 
   /* Button area stuff */
 
@@ -103,6 +103,10 @@ export default function Home() {
       "<br />"
     );
 
+    if (summaryStarted && assistantMessage.content.includes("Yes")) {
+      setCertificationReady(true);
+    }
+
     await setMessages((prevMessages) => {
       return [...prevMessages, assistantMessage];
     });
@@ -110,17 +114,17 @@ export default function Home() {
     setLoading(false);
   };
 
-  /* Pre-test zone */
+  /* Tutorial zone */
 
   const startTutorial = async (topic: string) => {
-    prepareCertificate();
-    // setTutorial(true);
-    // const tutorialRequest = `Could you summarise the concept of ${topic} for me? This will be in the context of blockchain-based technology. If at any point I summarise it correctly, please start your messae with 'Yes, that's correct!'`;
-    // const tutorialMessage = {
-    //   role: "user",
-    //   content: tutorialRequest,
-    // };
-    // callApi([tutorialMessage]);
+    setCoursesEnabled(false);
+    setTutorial(true);
+    const tutorialRequest = `Could you summarise the concept of ${topic} for me? This will be in the context of blockchain-based technology. If at any point I summarise it correctly, please start your messae with 'Yes, that's correct!'`;
+    const tutorialMessage = {
+      role: "user",
+      content: tutorialRequest,
+    };
+    callApi([tutorialMessage]);
   };
 
   const requestSimplification = async () => {
@@ -140,9 +144,26 @@ export default function Home() {
 
   const prepareSummary = async () => {
     // enable input box
+    startSummary(true);
   };
 
-  const submitSummary = async () => {
+  const submitSummary = async (
+    event: React.FormEvent<HTMLFormElement> | KeyboardEvent
+  ) => {
+    event.preventDefault();
+
+    if (userPrompt.trim() !== "") {
+      const userMessage = {
+        // craft user message
+        role: "user",
+        content: userPrompt,
+      };
+
+      const updatedMessages = [...messages, userMessage];
+      setMessages(updatedMessages);
+      setUserPrompt("");
+      callApi(updatedMessages);
+    }
     // send message to api with a prompt like: so is it like?
   };
 
@@ -198,27 +219,29 @@ export default function Home() {
   /* Certification time */
   const prepareCertificate = async () => {
     setCertificationStarted(true);
+    setTutorial(false);
+    setTesting(false);
     setLoading(true);
-    // const imagePrompt = `A cute image representing ${topic}`;
-    // const apiUrl = `https://api.openai.com/v1/images/generations`;
+    const imagePrompt = `A cute image representing ${topic}`;
+    const apiUrl = `https://api.openai.com/v1/images/generations`;
 
-    // const response = await fetch("/api/feynman-certification", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     "Access-Control-Allow-Origin": "*",
-    //   },
-    //   body: JSON.stringify({ prompt: imagePrompt }),
-    // });
+    const response = await fetch("/api/feynman-certification", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+      body: JSON.stringify({ prompt: imagePrompt }),
+    });
 
-    // const data = await response.json();
-    // console.log("Data: ", data);
-    // setCertificationUrls(data.data);
-    // setCertificationUrl(data.data[0]);
+    const data = await response.json();
+    console.log("Data: ", data);
+    setCertificationUrls(data.data);
+    setCertificationUrl(data.data[0]);
 
-    setCertificationUrl(
-      "https://oaidalleapiprodscus.blob.core.windows.net/private/org-1B7Wa8qKPRWXkwJBymJ4H8nG/user-kh7tYZ7RpQuhlrwhKG95bcYG/img-3LLDmm1l7XxFWaQG1XMm6oiG.png?st=2023-08-13T08%3A28%3A19Z&se=2023-08-13T10%3A28%3A19Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-08-12T17%3A22%3A40Z&ske=2023-08-13T17%3A22%3A40Z&sks=b&skv=2021-08-06&sig=2h9ZpfAx7WadIgV7lJOgk3llx2JOU4HSN5%2B453vI9mg%3D"
-    );
+    // setCertificationUrl(
+    //   "https://oaidalleapiprodscus.blob.core.windows.net/private/org-1B7Wa8qKPRWXkwJBymJ4H8nG/user-kh7tYZ7RpQuhlrwhKG95bcYG/img-3LLDmm1l7XxFWaQG1XMm6oiG.png?st=2023-08-13T08%3A28%3A19Z&se=2023-08-13T10%3A28%3A19Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-08-12T17%3A22%3A40Z&ske=2023-08-13T17%3A22%3A40Z&sks=b&skv=2021-08-06&sig=2h9ZpfAx7WadIgV7lJOgk3llx2JOU4HSN5%2B453vI9mg%3D"
+    // );
 
     // fetch(apiUrl, requestOptions as any)
     //   .then((response) => response.json())
@@ -263,30 +286,39 @@ export default function Home() {
 
     await tx.wait();
     console.log("Certification minted");
+    postMintingProcess();
+  };
 
+  const postMintingProcess = async () => {
     // reset everything
     setMessages([]);
     setCertificationMinted(true);
+    setCertificationStarted(false);
+    setCoursesEnabled(true);
+    setUserPrompt("");
   };
-
-  const triggerMintingNotification = async () => {};
 
   return (
     <div>
+      <Head>
+        <title>Feynman</title>
+      </Head>
       <Header></Header>
       <main
         className={`flex flex-col items-center justify-between p-12`}
         style={{ height: "90vh" }}
       >
-        <div
-          className="bg-blue-100 border-t border-b border-blue-500 text-blue-700 px-4 py-3 absolute"
-          role="alert"
-        >
-          <p className="font-bold">Congratulations!</p>
-          <p className="text-sm">
-            Check your wallet to see your certification.
-          </p>
-        </div>
+        {certificationMinted && (
+          <div
+            className="bg-blue-100 border-t border-b border-blue-500 text-blue-700 px-4 py-3 absolute"
+            role="alert"
+          >
+            <p className="font-bold">Congratulations!</p>
+            <p className="text-sm">
+              Check your wallet to see your certification.
+            </p>
+          </div>
+        )}
 
         {/* <div
           className="bg-red-100 border-t border-b border-red-500 text-red-700 px-4 py-3 absolute"
@@ -297,8 +329,9 @@ export default function Home() {
             Some additional text to explain said message.
           </p>
         </div> */}
+
         {/* courses zone */}
-        {!messages.length && !loading && (
+        {coursesEnabled && (
           <div className="w-full text-center flex flex-col items-center">
             <h1 style={{ fontSize: "2rem" }}>
               Hello learner! What would you like to test yourself on?
@@ -343,38 +376,41 @@ export default function Home() {
               {loading ? <p>Loading...</p> : <></>}
             </div>
             {!summaryStarted ? (
-              <div className="flex relative w-6/12 text-xl justify-center">
-                {simplificationPossible ? (
+              <div className="flex relative text-xl justify-center">
+                {simplificationPossible && (
                   <button
                     onClick={requestSimplification}
                     className="ml-4 mr-4 px-4 py-2 bg-green-500 hover:bg-green-700 text-white rounded-lg focus:ring-blue-500 focus:border-blue-500"
                   >
                     Simplify
                   </button>
-                ) : (
-                  <></>
-                  // <button
-                  //   onClick={prepareSummary}
-                  //   className="ml-4 mr-4 px-4 py-2 bg-green-500 hover:bg-green-700 text-white rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                  // >
-                  //   Summarise
-                  // </button>
                 )}
 
                 <button
-                  onClick={() => startTest}
+                  onClick={prepareSummary}
                   className="ml-3 mr-3 px-4 py-2 bg-yellow-700 hover:bg-yellow-900 text-white rounded-lg focus:ring-blue-500 focus:border-blue-500"
                 >
                   Test Yourself
                 </button>
               </div>
             ) : (
-              <InputBox
-                userPrompt={userPrompt}
-                handleSubmit={submitSummary}
-                handleInputChange={handleInputChange}
-                handleTextareaResize={handleTextareaResize}
-              />
+              <form className="flex justify-center">
+                {!certificationReady ? (
+                  <InputBox
+                    userPrompt={userPrompt}
+                    handleSubmit={submitSummary}
+                    handleInputChange={handleInputChange}
+                    handleTextareaResize={handleTextareaResize}
+                  />
+                ) : (
+                  <button
+                    onClick={prepareCertificate}
+                    className="ml-4 mr-4 px-4 py-2 bg-green-500 hover:bg-green-700 text-white rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    Prepare Certificate
+                  </button>
+                )}
+              </form>
             )}
           </div>
         )}
