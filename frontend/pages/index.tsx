@@ -92,7 +92,11 @@ export default function Home() {
     try {
       setLoading(true);
 
-      let apiPath = "/api/feynman-chat";
+      let apiPath =
+        "development" === process.env.NEXT_PUBLIC_ENV
+          ? "http://localhost:3000/api/feynman-chat"
+          : "https://feynman-six.vercel.app/api/feynman-chat";
+
       if (simulateError) {
         apiPath = "/api/mock-error";
       }
