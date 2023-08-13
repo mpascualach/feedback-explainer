@@ -30,13 +30,13 @@ const CourseButton: React.FC<ButtonProps> = ({
           >
             Tutorial
           </button>
-          <button
+          {/* <button
             onClick={() => onTestSelect(topic)}
             className="bg-yellow-700 hover:bg-yellow-900 text-white font-bold py-2 px-4 rounded-lg capitalize p-4 pl-6 pr-6 w-40 ml-3 mr-3 text-center"
             style={{ backgroundColor: "#ce8c12" }}
           >
             Test
-          </button>
+          </button> */}
         </>
       )}
     </div>
