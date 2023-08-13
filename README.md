@@ -1,7 +1,7 @@
 # Feynman
 An interactive platform to help developers teach themselves about blockchain programming
 
-(Note: there is a problem with the API calls in the deployed version that I am currently trying to fix)
+(Note: there is a problem with the API calls in the deployed version that I am currently trying to fix. Stand by for updates.)
 
 ## Description
 
