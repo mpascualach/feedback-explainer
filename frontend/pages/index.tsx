@@ -42,6 +42,9 @@ export default function Home() {
   const [mintingStarted, setMintingStarted] = useState<boolean>();
   const [certificationMinted, setCertificationMinted] = useState<boolean>();
 
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isErrorVisible, setIsErrorVisible] = useState(false);
+
   // still working on test mode
 
   const [testing, setTesting] = useState<boolean>();
@@ -85,39 +88,46 @@ export default function Home() {
   /* core API call functionality */
 
   const callApi = async (messagesToSend: Message[]) => {
-    console.log("Environment: ", process.env);
-    setLoading(true);
+    try {
+      console.log("Environment: ", process.env);
+      setLoading(true);
 
-    const response = await fetch("/api/feynman-chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-      },
-      body: JSON.stringify({ messages: messagesToSend }),
-    });
+      const response = await fetch("/api/feynman-chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+        body: JSON.stringify({ messages: messagesToSend }),
+      });
 
-    // const response = await fetch("/testResponse.json");
+      if (!response.ok) {
+        throw new Error(`API request failed with status: ${response.status}`);
+      }
 
-    const data = await response.json();
-    const assistantMessage = data.choices[0].message;
-    assistantMessage.content = assistantMessage.content.replace(
-      /\n/g,
-      "<br />"
-    );
+      const data = await response.json();
+      const assistantMessage = data.choices[0].message;
+      assistantMessage.content = assistantMessage.content.replace(
+        /\n/g,
+        "<br />"
+      );
 
-    if (
-      (summaryStarted && assistantMessage.content.includes("Yes")) ||
-      assistantMessage.content.includes("Exactly")
-    ) {
-      setCertificationReady(true);
+      if (
+        (summaryStarted && assistantMessage.content.includes("Yes")) ||
+        assistantMessage.content.includes("Exactly")
+      ) {
+        setCertificationReady(true);
+      }
+
+      await setMessages((prevMessages) => {
+        return [...prevMessages, assistantMessage];
+      });
+
+      setLoading(false);
+    } catch (error) {
+      console.error("API request error:", error);
+      setLoading(false);
     }
-
-    await setMessages((prevMessages) => {
-      return [...prevMessages, assistantMessage];
-    });
-
-    setLoading(false);
   };
 
   /* Tutorial zone */
@@ -311,6 +321,15 @@ export default function Home() {
         className={`flex flex-col items-center justify-between p-12`}
         style={{ height: "90vh" }}
       >
+        {isErrorVisible && (
+          <div
+            className="bg-red-100 border-t border-b border-red-500 text-red-700 px-4 py-3 absolute"
+            role="alert"
+          >
+            <p className="font-bold">Error</p>
+            <p className="text-sm">{errorMessage}</p>
+          </div>
+        )}
         {certificationMinted && (
           <div
             className="bg-blue-100 border-t border-b border-blue-500 text-blue-700 px-4 py-3 absolute"
