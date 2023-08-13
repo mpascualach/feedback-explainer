@@ -1,7 +1,7 @@
 # Feynman
 An interactive platform to help developers teach themselves about blockchain programming
 
-(Note: access the deployed version of this app here[https://feynman-six.vercel.app/])
+(Note: there is a problem with the API calls in the deployed version that I am currently trying to fix)
 
 ## Description
 
