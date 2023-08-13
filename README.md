@@ -1,7 +1,7 @@
 # Feynman
 An interactive platform to help developers teach themselves about blockchain programming
 
-(Note: access the deployed version of this app here: https://main--feynman-gpt.netlify.app/)
+(Note: access the deployed version of this app here[https://feynman-six.vercel.app/])
 
 ## Description
 
