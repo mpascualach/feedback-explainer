@@ -66,7 +66,7 @@ export default function Home() {
     if (messages.length > 0) {
       setMessages([]);
     }
-  }, []);
+  });
 
   const resetApp = () => {
     setCoursesEnabled(true);
@@ -474,8 +474,8 @@ export default function Home() {
               <div className="h-3/4 w-9/12">
                 <div className="p-5 bg-gray-800 rounded text-xl">
                   <p className="mt-10 mb-10">
-                    While we're waiting, here's a blockchain-themed joke for
-                    you:
+                    While we`&apos;`re waiting, here`&apos;`s a
+                    blockchain-themed joke for you:
                   </p>
                   <hr style={{ opacity: "0.2" }}></hr>
                   <p className="mt-10 mb-10">
