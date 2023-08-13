@@ -1,7 +1,7 @@
 # Feynman
 An interactive platform to help developers teach themselves about blockchain programming
 
-###Technical difficulties
+### Technical difficulties
 
 There are currently problems with the API calls made in the deployed version. Try them there anyway, but if they don't work, you could try the following:
 - Provide your OpenAI API Key as a part of .env (replacing the one in .env.example with your own)
