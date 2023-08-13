@@ -38,6 +38,9 @@ export default function Home() {
   const [certificationUrls, setCertificationUrls] = useState<string[]>([]);
   const [certificationUrl, setCertificationUrl] = useState<string>();
 
+  const [mintingStarted, setMintingStarted] = useState<boolean>();
+  const [certificationMinted, setCertificationMinted] = useState<boolean>();
+
   const [testing, setTesting] = useState<boolean>();
   const [points, setPoints] = useState<number>(0);
 
@@ -59,74 +62,6 @@ export default function Home() {
   useEffect(() => {
     prepareCertificate();
   }, []);
-
-  /* Certification time */
-  const prepareCertificate = async () => {
-    setCertificationStarted(true);
-    setLoading(true);
-    // const imagePrompt = `A cute image representing ${topic}`;
-    // const apiUrl = `https://api.openai.com/v1/images/generations`;
-
-    // const response = await fetch("/api/feynman-certification", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     "Access-Control-Allow-Origin": "*",
-    //   },
-    //   body: JSON.stringify({ prompt: imagePrompt }),
-    // });
-
-    // const data = await response.json();
-    // console.log("Data: ", data);
-    // setCertificationUrls(data.data);
-    // setCertificationUrl(data.data[0]);
-
-    setCertificationUrl(
-      "https://oaidalleapiprodscus.blob.core.windows.net/private/org-1B7Wa8qKPRWXkwJBymJ4H8nG/user-kh7tYZ7RpQuhlrwhKG95bcYG/img-3LLDmm1l7XxFWaQG1XMm6oiG.png?st=2023-08-13T08%3A28%3A19Z&se=2023-08-13T10%3A28%3A19Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-08-12T17%3A22%3A40Z&ske=2023-08-13T17%3A22%3A40Z&sks=b&skv=2021-08-06&sig=2h9ZpfAx7WadIgV7lJOgk3llx2JOU4HSN5%2B453vI9mg%3D"
-    );
-
-    // fetch(apiUrl, requestOptions as any)
-    //   .then((response) => response.json())
-    //   .then((data) => {
-    //     console.log("Data: ", data);
-    //   });
-    // console.log("REs: ", res);
-  };
-
-  const mintCertification = async () => {
-    const abi = [
-      "function mintCertification(string memory title,string memory description,string memory imageURI,string memory issuer) external",
-    ];
-
-    const web3Modal = new Web3Modal({
-      cacheProvider: true,
-      providerOptions: {
-        walletconnect: {
-          package: WalletConnectProvider,
-        },
-      },
-    });
-    const instance = await web3Modal.connect();
-    const provider = new ethers.BrowserProvider(instance);
-    const signer = await provider.getSigner();
-    const smartContract = new ethers.Contract(contractAddress, abi, provider);
-    const contractWithSigner: ethers.BaseContract =
-      smartContract.connect(signer);
-
-    const title = `Certification of ${topic} complete`;
-    const description = `This is to certify that ${topic} has been understood to such a point where ${signer.address} is no longer a beginner.`;
-    const imageURI = "Test";
-    const issuer = "Feynman";
-
-    const tx = await (contractWithSigner as any).mintCertification(
-      title,
-      description,
-      imageURI,
-      issuer
-    );
-
-    await tx.wait();
-  };
 
   /* Button area stuff */
 
@@ -260,6 +195,82 @@ export default function Home() {
     }
   };
 
+  /* Certification time */
+  const prepareCertificate = async () => {
+    setCertificationStarted(true);
+    setLoading(true);
+    // const imagePrompt = `A cute image representing ${topic}`;
+    // const apiUrl = `https://api.openai.com/v1/images/generations`;
+
+    // const response = await fetch("/api/feynman-certification", {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //     "Access-Control-Allow-Origin": "*",
+    //   },
+    //   body: JSON.stringify({ prompt: imagePrompt }),
+    // });
+
+    // const data = await response.json();
+    // console.log("Data: ", data);
+    // setCertificationUrls(data.data);
+    // setCertificationUrl(data.data[0]);
+
+    setCertificationUrl(
+      "https://oaidalleapiprodscus.blob.core.windows.net/private/org-1B7Wa8qKPRWXkwJBymJ4H8nG/user-kh7tYZ7RpQuhlrwhKG95bcYG/img-3LLDmm1l7XxFWaQG1XMm6oiG.png?st=2023-08-13T08%3A28%3A19Z&se=2023-08-13T10%3A28%3A19Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-08-12T17%3A22%3A40Z&ske=2023-08-13T17%3A22%3A40Z&sks=b&skv=2021-08-06&sig=2h9ZpfAx7WadIgV7lJOgk3llx2JOU4HSN5%2B453vI9mg%3D"
+    );
+
+    // fetch(apiUrl, requestOptions as any)
+    //   .then((response) => response.json())
+    //   .then((data) => {
+    //     console.log("Data: ", data);
+    //   });
+    // console.log("REs: ", res);
+  };
+
+  const mintCertification = async () => {
+    const abi = [
+      "function mintCertification(string memory title,string memory description,string memory imageURI,string memory issuer) external",
+    ];
+
+    const web3Modal = new Web3Modal({
+      cacheProvider: true,
+      providerOptions: {
+        walletconnect: {
+          package: WalletConnectProvider,
+        },
+      },
+    });
+    const instance = await web3Modal.connect();
+    const provider = new ethers.BrowserProvider(instance);
+    const signer = await provider.getSigner();
+    const smartContract = new ethers.Contract(contractAddress, abi, provider);
+    const contractWithSigner: ethers.BaseContract =
+      smartContract.connect(signer);
+
+    const title = `Certification of ${topic} complete`;
+    const description = `This is to certify that ${topic} has been understood to such a point where ${signer.address} is no longer a beginner.`;
+    const imageURI = "Test";
+    const issuer = "Feynman";
+
+    // very hacky solution that I will address soon
+    const tx = await (contractWithSigner as any).mintCertification(
+      title,
+      description,
+      imageURI,
+      issuer
+    );
+
+    await tx.wait();
+    console.log("Certification minted");
+
+    // reset everything
+    setMessages([]);
+    setCertificationMinted(true);
+  };
+
+  const triggerMintingNotification = async () => {};
+
   return (
     <div>
       <Header></Header>
@@ -267,6 +278,25 @@ export default function Home() {
         className={`flex flex-col items-center justify-between p-12`}
         style={{ height: "90vh" }}
       >
+        <div
+          className="bg-blue-100 border-t border-b border-blue-500 text-blue-700 px-4 py-3 absolute"
+          role="alert"
+        >
+          <p className="font-bold">Congratulations!</p>
+          <p className="text-sm">
+            Check your wallet to see your certification.
+          </p>
+        </div>
+
+        {/* <div
+          className="bg-red-100 border-t border-b border-red-500 text-red-700 px-4 py-3 absolute"
+          role="alert"
+        >
+          <p className="font-bold">Informational message</p>
+          <p className="text-sm">
+            Some additional text to explain said message.
+          </p>
+        </div> */}
         {/* courses zone */}
         {!messages.length && !loading && (
           <div className="w-full text-center flex flex-col items-center">
@@ -375,9 +405,19 @@ export default function Home() {
 
         {certificationStarted && (
           <div
-            className="bg-cover rounded w-9/12 h-3/4"
+            className="bg-cover rounded w-9/12 h-3/4 flex justify-center items-center cursor-pointer"
             style={{ backgroundImage: `url(${certificationUrl})` }}
-          ></div>
+            onClick={mintCertification}
+          >
+            <div
+              className="bg-gray-800 p-5 rounded flex flex-col items-center text-xl"
+              style={{ height: "fit-content" }}
+            >
+              <span className="capitalize"> {topic} Certification</span>
+              <br></br>
+              <span>Click to mint</span>
+            </div>
+          </div>
         )}
       </main>
     </div>
