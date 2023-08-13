@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
-
-import Head from "next/head";
+import getConfig from "next/config";
+const { publicRuntimeConfig } = getConfig();
 
 import { CustomHead } from "@/components/CustomHead";
 import Header from "@/components/Header";
@@ -92,10 +92,7 @@ export default function Home() {
     try {
       setLoading(true);
 
-      let apiPath =
-        "development" === process.env.NEXT_PUBLIC_ENV
-          ? "http://localhost:3000/api/feynman-chat"
-          : "https://feynman-six.vercel.app/api/feynman-chat";
+      let apiPath = "/api/feynman-chat";
 
       if (simulateError) {
         apiPath = "/api/mock-error";
@@ -103,6 +100,7 @@ export default function Home() {
 
       const response = await fetch(apiPath, {
         method: "POST",
+        mode: "cors",
         headers: {
           "Content-Type": "application/json",
           "Access-Control-Allow-Origin": "*",
