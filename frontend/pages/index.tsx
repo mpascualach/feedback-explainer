@@ -89,7 +89,6 @@ export default function Home() {
   /* core API call functionality */
 
   const callApi = async (messagesToSend: Message[], simulateError = false) => {
-    console.log("Simulate error?: ", simulateError);
     try {
       setLoading(true);
 
@@ -150,7 +149,7 @@ export default function Home() {
       role: "user",
       content: tutorialRequest,
     };
-    callApi([tutorialMessage], true);
+    callApi([tutorialMessage]);
   };
 
   const requestSimplification = async () => {
