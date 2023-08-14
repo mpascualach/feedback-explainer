@@ -245,29 +245,37 @@ export default function Home() {
 
   /* Certification time */
   const prepareCertificate = async () => {
-    setCertificationStarted(true);
-    setTutorial(false);
-    setTesting(false);
-    // yeah I should probably work with a string-based selector rather than a set of boolean ones...
+    try {
+      setCertificationStarted(true);
+      setTutorial(false);
+      setTesting(false);
+      // yeah I should probably work with a string-based selector rather than a set of boolean ones...
 
-    setLoading(true);
-    const imagePrompt = `A cute image representing ${topic}`;
-    const apiUrl = `https://api.openai.com/v1/images/generations`;
+      setLoading(true);
+      const imagePrompt = `A cute image representing ${topic}`;
+      const apiUrl = `https://api.openai.com/v1/images/generations`;
 
-    const response = await fetch("/api/feynman-certification", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-      },
-      body: JSON.stringify({ prompt: imagePrompt }),
-    });
+      const response = await fetch("/api/feynman-certification", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+        body: JSON.stringify({ prompt: imagePrompt }),
+      });
 
-    const data = await response.json();
-    console.log("Data: ", data);
-    setCertificationUrls(data.data);
-    setCertificationUrl(data.data[0].url);
-    setLoading(false);
+      const data = await response.json();
+      console.log("Data: ", data);
+      setCertificationUrls(data.data);
+      setCertificationUrl(data.data[0].url);
+      setLoading(false);
+    } catch (error) {
+      console.error("API request error:", error);
+      resetApp();
+      setErrorMessage((error as any).message);
+      setIsErrorVisible(true);
+      setLoading(false);
+    }
   };
 
   const mintCertification = async () => {
