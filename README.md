@@ -40,4 +40,8 @@ More work involved would entail:
 
 I am quite happy with what I put together throughout the week though. It feels like a good starting point.
 
+## To do next
+
+Cache API responses - in case my API takes a long time to respond (which it currently does)
+
 
