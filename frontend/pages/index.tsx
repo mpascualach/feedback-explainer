@@ -92,7 +92,8 @@ export default function Home() {
     try {
       setLoading(true);
 
-      let apiPath = "/api/feynman-chat";
+      // let apiPath = "/api/feynman-chat";
+      let apiPath = "https://feynman-six.vercel.app/api/feynman-chat";
 
       if (simulateError) {
         apiPath = "/api/mock-error";
